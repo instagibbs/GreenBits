@@ -1,5 +1,7 @@
 package com.greenaddress.greenbits;
 
+import com.subgraph.orchid.TorClient;
+
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -61,6 +63,7 @@ import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.crypto.MnemonicException;
 import org.bitcoinj.crypto.TransactionSignature;
 import org.bitcoinj.net.discovery.DnsDiscovery;
+import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
 import org.bitcoinj.store.BlockStore;
@@ -75,6 +78,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -542,7 +546,12 @@ public class GaService extends Service {
 
             blockChain = new BlockChain(Network.NETWORK, blockStore);
             blockChain.addListener(makeBlockChainListener());
-
+            try {
+                peerGroup = PeerGroup.newWithTor(MainNetParams.get(), null, new TorClient());
+            }catch (Exception e){
+                e.printStackTrace();
+                System.exit(0);
+            }
             peerGroup = new PeerGroup(Network.NETWORK, blockChain);
             peerGroup.addPeerFilterProvider(makePeerFilterProvider());
 
@@ -554,6 +563,18 @@ public class GaService extends Service {
                 }
                 peerGroup.setMaxConnections(1);
             } else {
+                try {
+                    PeerAddress OnionAddr = new PeerAddress(InetAddress.getByName("5at7sq5nm76xijkd.onion")) {
+                        public InetSocketAddress toSocketAddress() {
+                            return InetSocketAddress.createUnresolved("5at7sq5nm76xijkd.onion", params.getPort());
+                        }
+                    };
+                    peerGroup.addAddress(OnionAddr);
+                    return;
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
                 peerGroup.addPeerDiscovery(new DnsDiscovery(Network.NETWORK));
             }
         } catch (BlockStoreException e) {
