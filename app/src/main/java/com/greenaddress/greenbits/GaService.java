@@ -568,7 +568,23 @@ public class GaService extends Service {
 
     private void setUpSPV() {
         File blockChainFile = new File(getDir("blockstore_" + receivingId, Context.MODE_PRIVATE), "blockchain.spvchain");
-
+        System.setProperty("user.home", Environment.getExternalStorageDirectory().toString());//"/data/user/0");
+        //final File dd = new File(System.getProperty("user.home")+"/.onion");
+        //if (dd.exists()){
+        //    System.out.println("Already here");
+        //}else{
+        //    System.out.println("Not here");
+        //    if(!dd.mkdirs()){
+        //        System.out.println("Couldn't make folder");
+        //    }
+        //    if(dd.exists()){
+        //
+        //        System.out.println("It has been made");
+        //    }
+        //}
+        //}
+        //System.out.println(home);
+        //System.exit(0);
         try {
             blockStore = new SPVBlockStore(Network.NETWORK, blockChainFile);
             blockStore.getChainHead(); // detect corruptions as early as possible
@@ -581,8 +597,8 @@ public class GaService extends Service {
                 e.printStackTrace();
                 System.exit(0);
             }
-            peerGroup = new PeerGroup(Network.NETWORK, blockChain);
-            peerGroup.addPeerFilterProvider(makePeerFilterProvider());
+            //peerGroup = new PeerGroup(Network.NETWORK, blockChain);
+            //peerGroup.addPeerFilterProvider(makePeerFilterProvider());
 
             if (Network.NETWORK.getId().equals(NetworkParameters.ID_REGTEST)) {
                 try {
@@ -593,15 +609,30 @@ public class GaService extends Service {
                 peerGroup.setMaxConnections(1);
             } else {
                 try {
-                    PeerAddress OnionAddr = new PeerAddress(InetAddress.getByName("5at7sq5nm76xijkd.onion")) {
+                    PeerAddress OnionAddr = new PeerAddress(InetAddress.getLocalHost(), 8333) {
                         public InetSocketAddress toSocketAddress() {
-                            return InetSocketAddress.createUnresolved("5at7sq5nm76xijkd.onion", params.getPort());
+                            return InetSocketAddress.createUnresolved("5at7sq5nm76xijkd.onion", 8333);
                         }
                     };
                     peerGroup.addAddress(OnionAddr);
+                    //System.out.println("Peergroup created");
+                    //peerGroup.start();
+                    //System.out.println("Peergroup started");
+                    //peerGroup.waitForPeers(1).get();
+                    //System.out.println("Peers connected: " + peerGroup.getConnectedPeers());
+                    //System.out.println(peerGroup.getConnectedPeers().get(0).getPeerVersionMessage().subVer);
+                    //try {
+                    //    Thread.sleep(10000);
+                    //} catch (InterruptedException e1) {
+                    //    e1.printStackTrace();
+                    //}
+                    //System.exit(0);
                     return;
                 }catch (Exception e){
+                    System.out.println("Tor stuff broke.");
                     e.printStackTrace();
+
+                    System.exit(0);
                 }
 
                 peerGroup.addPeerDiscovery(new DnsDiscovery(Network.NETWORK));
