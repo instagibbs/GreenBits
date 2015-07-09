@@ -170,6 +170,40 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
             }
         });
 
+        final EditTextPreference trusted_peer = (EditTextPreference) getPreferenceManager().findPreference("trusted_peer");
+        final SharedPreferences trustedPreferences = getSharedPreferences("TRUSTED", MODE_PRIVATE);
+        trusted_peer.setText(trustedPreferences.getString("address", ""));
+        trusted_peer.setSummary(trustedPreferences.getString("address", ""));
+        //trusted_peer.setText(trustedPreferences.getString("address", ""));
+        trusted_peer.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(final Preference preference, final Object newValue) {
+
+                try {
+                    SharedPreferences.Editor editor = trustedPreferences.edit();
+                    editor.putString("address", newValue.toString());
+                    editor.apply();
+
+                    getGAService().setAppearanceValue("trusted_peer_addr", newValue.toString(), true);
+                    trusted_peer.setSummary(newValue.toString());
+                    new MaterialDialog.Builder(SettingsActivity.this)
+                            .title(getResources().getString(R.string.changingRequiresRestartTitle))
+                            .content(getResources().getString(R.string.changingRequiresRestartText))
+                            .positiveColorRes(R.color.accent)
+                            .negativeColorRes(R.color.white)
+                            .titleColorRes(R.color.white)
+                            .contentColorRes(android.R.color.white)
+                            .theme(Theme.DARK)
+                            .positiveText("OK")
+                            .build().show();
+                    return true;
+                } catch (final Exception e) {
+                    // not set
+                }
+                return false;
+            }
+        });
+
         Map<?, ?> twoFacConfig = getGAService().getTwoFacConfig();
 
         final CheckBoxPreference emailTwoFacEnabled = (CheckBoxPreference) getPreferenceManager().findPreference("twoFacEmail");
