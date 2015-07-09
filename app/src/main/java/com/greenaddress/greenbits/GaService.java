@@ -566,43 +566,9 @@ public class GaService extends Service {
         }, es);
     }
 
-    private void setUpSPVOnion() {
+    private void setUpSPV() {
         File blockChainFile = new File(getDir("blockstore_" + receivingId, Context.MODE_PRIVATE), "blockchain.spvchain");
-        System.setProperty("user.home", Environment.getExternalStorageDirectory().toString());// This needs to fire up each time app is started.
 
-        try {
-            blockStore = new SPVBlockStore(Network.NETWORK, blockChainFile);
-            blockStore.getChainHead(); // detect corruptions as early as possible
-
-            blockChain = new BlockChain(Network.NETWORK, blockStore);
-            blockChain.addListener(makeBlockChainListener());
-            try {
-                peerGroup = PeerGroup.newWithTor(MainNetParams.get(), null, new TorClient());
-            }catch (Exception e){
-                e.printStackTrace();
-                System.exit(0);
-            }
-
-            try {
-                PeerAddress OnionAddr = new PeerAddress(InetAddress.getLocalHost(), 8333) {
-                    public InetSocketAddress toSocketAddress() {
-                        return InetSocketAddress.createUnresolved("5at7sq5nm76xijkd.onion", 8333);
-                    }
-                };
-                peerGroup.addAddress(OnionAddr);
-
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        } catch (BlockStoreException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private void setUpSPVTrusted() {
-        File blockChainFile = new File(getDir("blockstore_" + receivingId, Context.MODE_PRIVATE), "blockchain.spvchain");
-        final String trusted_addr = getSharedPreferences("TRUSTED", MODE_PRIVATE).getString("address", "");
         try {
             blockStore = new SPVBlockStore(Network.NETWORK, blockChainFile);
             blockStore.getChainHead(); // detect corruptions as early as possible
@@ -621,11 +587,7 @@ public class GaService extends Service {
                 }
                 peerGroup.setMaxConnections(1);
             } else {
-                try {
-                    peerGroup.addAddress(new PeerAddress(InetAddress.getByName(trusted_addr), Network.NETWORK.getPort()));
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
-                }
+                peerGroup.addPeerDiscovery(new DnsDiscovery(Network.NETWORK));
             }
         } catch (BlockStoreException e) {
             e.printStackTrace();
@@ -635,8 +597,7 @@ public class GaService extends Service {
 
     private void setUpSPVOnion() {
         File blockChainFile = new File(getDir("blockstore_" + receivingId, Context.MODE_PRIVATE), "blockchain.spvchain");
-        // This needs to fire up each time app is started, since Orchid needs it to place files.
-        System.setProperty("user.home", getApplicationContext().getFilesDir().toString());
+        System.setProperty("user.home", Environment.getExternalStorageDirectory().toString());// This needs to fire up each time app is started.
         final String trusted_addr = getSharedPreferences("TRUSTED", MODE_PRIVATE).getString("address", "");
         try {
             blockStore = new SPVBlockStore(Network.NETWORK, blockChainFile);
@@ -645,16 +606,16 @@ public class GaService extends Service {
             blockChain = new BlockChain(Network.NETWORK, blockStore);
             blockChain.addListener(makeBlockChainListener());
             try {
-                org.bitcoinj.core.Context context = new org.bitcoinj.core.Context(Network.NETWORK);
-                peerGroup = PeerGroup.newWithTor(context, blockChain, new TorClient(), false);
-                peerGroup.addPeerFilterProvider(makePeerFilterProvider());
+                peerGroup = PeerGroup.newWithTor(MainNetParams.get(), null, new TorClient());
             }catch (Exception e){
                 e.printStackTrace();
+                System.exit(0);
             }
+
             try {
-                PeerAddress OnionAddr = new PeerAddress(InetAddress.getLocalHost(), Network.NETWORK.getPort()) {
+                PeerAddress OnionAddr = new PeerAddress(InetAddress.getLocalHost(), 8333) {
                     public InetSocketAddress toSocketAddress() {
-                        return InetSocketAddress.createUnresolved(trusted_addr, Network.NETWORK.getPort());
+                        return InetSocketAddress.createUnresolved(trusted_addr, 8333);
                     }
                 };
                 peerGroup.addAddress(OnionAddr);
