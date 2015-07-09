@@ -185,7 +185,13 @@ public class GaService extends Service {
             gaDeterministicKeys = new HashMap<>();
             isSpvSyncing = false;
             if (getSharedPreferences("SPV", MODE_PRIVATE).getBoolean("enabled", true)) {
-                setUpSPVOnion();
+                String trusted_addr = getSharedPreferences("TRUSTED", MODE_PRIVATE).getString("address", "");
+                if (!trusted_addr.equals("")){// && trusted_addr.substring(trusted_addr.length()-6).equals(".onion")){
+                    setUpSPVOnion(); //Where do we check address formatting?
+                }else{
+                    setUpSPV();
+                }
+
                 if (startSpvAfterInit) {
                     startSpvSync();
                 }
@@ -538,10 +544,39 @@ public class GaService extends Service {
         }, es);
     }
 
+    private void setUpSPV() {
+        File blockChainFile = new File(getDir("blockstore_" + receivingId, Context.MODE_PRIVATE), "blockchain.spvchain");
+
+        try {
+            blockStore = new SPVBlockStore(Network.NETWORK, blockChainFile);
+            blockStore.getChainHead(); // detect corruptions as early as possible
+
+            blockChain = new BlockChain(Network.NETWORK, blockStore);
+            blockChain.addListener(makeBlockChainListener());
+
+            peerGroup = new PeerGroup(Network.NETWORK, blockChain);
+            peerGroup.addPeerFilterProvider(makePeerFilterProvider());
+
+            if (Network.NETWORK.getId().equals(NetworkParameters.ID_REGTEST)) {
+                try {
+                    peerGroup.addAddress(new PeerAddress(InetAddress.getByName("192.168.56.1"), 19000));
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                }
+                peerGroup.setMaxConnections(1);
+            } else {
+                peerGroup.addPeerDiscovery(new DnsDiscovery(Network.NETWORK));
+            }
+        } catch (BlockStoreException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     private void setUpSPVOnion() {
         File blockChainFile = new File(getDir("blockstore_" + receivingId, Context.MODE_PRIVATE), "blockchain.spvchain");
         System.setProperty("user.home", Environment.getExternalStorageDirectory().toString());// This needs to fire up each time app is started.
-
+        final String trusted_addr = getSharedPreferences("TRUSTED", MODE_PRIVATE).getString("address", "");
         try {
             blockStore = new SPVBlockStore(Network.NETWORK, blockChainFile);
             blockStore.getChainHead(); // detect corruptions as early as possible
@@ -558,7 +593,7 @@ public class GaService extends Service {
             try {
                 PeerAddress OnionAddr = new PeerAddress(InetAddress.getLocalHost(), 8333) {
                     public InetSocketAddress toSocketAddress() {
-                        return InetSocketAddress.createUnresolved("5at7sq5nm76xijkd.onion", 8333);
+                        return InetSocketAddress.createUnresolved(trusted_addr, 8333);
                     }
                 };
                 peerGroup.addAddress(OnionAddr);
