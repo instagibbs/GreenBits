@@ -236,11 +236,9 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
             }
         });
 
-        final EditTextPreference trusted_peer = (EditTextPreference) getPreferenceManager().findPreference("trusted_peer");
         final SharedPreferences trustedPreferences = getSharedPreferences("TRUSTED", MODE_PRIVATE);
         trusted_peer.setText(trustedPreferences.getString("address", ""));
         trusted_peer.setSummary(trustedPreferences.getString("address", ""));
-        //trusted_peer.setText(trustedPreferences.getString("address", ""));
         trusted_peer.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(final Preference preference, final Object newValue) {
