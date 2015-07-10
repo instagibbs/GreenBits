@@ -148,6 +148,8 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
 
         final CheckBoxPreference spvEnabled = (CheckBoxPreference) getPreferenceManager().findPreference("spvEnabled");
         final SharedPreferences spvPreferences = getSharedPreferences("SPV", MODE_PRIVATE);
+        final EditTextPreference trusted_peer = (EditTextPreference) getPreferenceManager().findPreference("trusted_peer");
+        trusted_peer.setEnabled(spvPreferences.getBoolean("enabled", true));
         spvEnabled.setChecked(spvPreferences.getBoolean("enabled", true));
         spvEnabled.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
@@ -155,6 +157,7 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
                 SharedPreferences.Editor editor = spvPreferences.edit();
                 editor.putBoolean("enabled", (Boolean) newValue);
                 editor.apply();
+                trusted_peer.setEnabled((Boolean) newValue);
 
                 new MaterialDialog.Builder(SettingsActivity.this)
                         .title(getResources().getString(R.string.changingRequiresRestartTitle))
@@ -170,11 +173,9 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
             }
         });
 
-        final EditTextPreference trusted_peer = (EditTextPreference) getPreferenceManager().findPreference("trusted_peer");
         final SharedPreferences trustedPreferences = getSharedPreferences("TRUSTED", MODE_PRIVATE);
         trusted_peer.setText(trustedPreferences.getString("address", ""));
         trusted_peer.setSummary(trustedPreferences.getString("address", ""));
-        //trusted_peer.setText(trustedPreferences.getString("address", ""));
         trusted_peer.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(final Preference preference, final Object newValue) {
