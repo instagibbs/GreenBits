@@ -94,8 +94,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -187,7 +190,12 @@ public class GaService extends Service {
             if (getSharedPreferences("SPV", MODE_PRIVATE).getBoolean("enabled", true)) {
                 String trusted_addr = getSharedPreferences("TRUSTED", MODE_PRIVATE).getString("address", "");
                 if (!trusted_addr.equals("")){
-                    setUpSPVOnion();
+                    if (trusted_addr.substring(trusted_addr.indexOf('.')).equals(".onion")) {
+                        setUpSPVOnion();
+                    }
+                    else{
+                        setUpSPVTrusted();
+                    }
                 }else{
                     setUpSPV();
                 }
@@ -573,6 +581,39 @@ public class GaService extends Service {
 
     }
 
+    private void setUpSPVTrusted() {
+        File blockChainFile = new File(getDir("blockstore_" + receivingId, Context.MODE_PRIVATE), "blockchain.spvchain");
+        final String trusted_addr = getSharedPreferences("TRUSTED", MODE_PRIVATE).getString("address", "");
+        try {
+            blockStore = new SPVBlockStore(Network.NETWORK, blockChainFile);
+            blockStore.getChainHead(); // detect corruptions as early as possible
+
+            blockChain = new BlockChain(Network.NETWORK, blockStore);
+            blockChain.addListener(makeBlockChainListener());
+
+            peerGroup = new PeerGroup(Network.NETWORK, blockChain);
+            peerGroup.addPeerFilterProvider(makePeerFilterProvider());
+
+            if (Network.NETWORK.getId().equals(NetworkParameters.ID_REGTEST)) {
+                try {
+                    peerGroup.addAddress(new PeerAddress(InetAddress.getByName("192.168.56.1"), 19000));
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                }
+                peerGroup.setMaxConnections(1);
+            } else {
+                try {
+                    peerGroup.addAddress(new PeerAddress(InetAddress.getByName(trusted_addr), 8333));
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (BlockStoreException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     private void setUpSPVOnion() {
         File blockChainFile = new File(getDir("blockstore_" + receivingId, Context.MODE_PRIVATE), "blockchain.spvchain");
         System.setProperty("user.home", Environment.getExternalStorageDirectory().toString());// This needs to fire up each time app is started.
@@ -584,7 +625,8 @@ public class GaService extends Service {
             blockChain = new BlockChain(Network.NETWORK, blockStore);
             blockChain.addListener(makeBlockChainListener());
             try {
-                peerGroup = PeerGroup.newWithTor(MainNetParams.get(), null, new TorClient());
+                org.bitcoinj.core.Context context = new org.bitcoinj.core.Context(MainNetParams.get());
+                peerGroup = PeerGroup.newWithTor(context, blockChain, new TorClient(), false);
             }catch (Exception e){
                 e.printStackTrace();
                 System.exit(0);
