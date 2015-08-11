@@ -130,8 +130,15 @@ public class TransactionActivity extends ActionBarActivity implements Observer {
                     if (t.spvVerified) {
                         rootView.findViewById(R.id.txUnconfirmed).setVisibility(View.GONE);
                     } else {
-                        unconfirmedText.setText(getResources().getString(R.string.txUnverifiedTx) + " " +
-                                getGAService().getSpvBlocksLeft());
+                        int blocksleft = getGAService().getSpvBlocksLeft();
+                        if(blocksleft != Integer.MAX_VALUE) {
+                            unconfirmedText.setText(getResources().getString(R.string.txUnverifiedTx) + " " +
+                                    getGAService().getSpvBlocksLeft());
+                        }
+                        else{
+                            unconfirmedText.setText(getResources().getString(R.string.txUnverifiedTx) + " " +
+                                    "Not yet connected to SPV!");
+                        }
                     }
                 }
             }
