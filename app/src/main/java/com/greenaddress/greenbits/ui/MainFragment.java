@@ -307,8 +307,7 @@ public class MainFragment extends GAFragment implements Observer {
                         public void run() {
                             if (spvStatusDialog != null) {
                                 try {
-                                    int blocksleft = getGAService().getSpvBlocksLeft();
-                                    if(blocksleft != Integer.MAX_VALUE) {
+                                    if(getGAService().getSpvBlocksLeft() != Integer.MAX_VALUE) {
                                         spvStatusDialog.setContent(getResources().getString(R.string.unconfirmedBalanceText) + " " +
                                                 getGAService().getSpvBlocksLeft());
                                     }
