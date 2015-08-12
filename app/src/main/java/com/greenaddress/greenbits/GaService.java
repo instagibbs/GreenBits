@@ -64,7 +64,6 @@ import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.crypto.MnemonicException;
 import org.bitcoinj.crypto.TransactionSignature;
 import org.bitcoinj.net.discovery.DnsDiscovery;
-import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
 import org.bitcoinj.store.BlockStore;
@@ -603,7 +602,7 @@ public class GaService extends Service {
                 peerGroup.setMaxConnections(1);
             } else {
                 try {
-                    peerGroup.addAddress(new PeerAddress(InetAddress.getByName(trusted_addr), 8333));
+                    peerGroup.addAddress(new PeerAddress(InetAddress.getByName(trusted_addr), Network.NETWORK.getPort()));
                 } catch (UnknownHostException e) {
                     e.printStackTrace();
                 }
@@ -625,7 +624,7 @@ public class GaService extends Service {
             blockChain = new BlockChain(Network.NETWORK, blockStore);
             blockChain.addListener(makeBlockChainListener());
             try {
-                org.bitcoinj.core.Context context = new org.bitcoinj.core.Context(MainNetParams.get());
+                org.bitcoinj.core.Context context = new org.bitcoinj.core.Context(Network.NETWORK);
                 peerGroup = PeerGroup.newWithTor(context, blockChain, new TorClient(), false);
             }catch (Exception e){
                 e.printStackTrace();
@@ -633,9 +632,9 @@ public class GaService extends Service {
             }
 
             try {
-                PeerAddress OnionAddr = new PeerAddress(InetAddress.getLocalHost(), 8333) {
+                PeerAddress OnionAddr = new PeerAddress(InetAddress.getLocalHost(), Network.NETWORK.getPort()) {
                     public InetSocketAddress toSocketAddress() {
-                        return InetSocketAddress.createUnresolved(trusted_addr, 8333);
+                        return InetSocketAddress.createUnresolved(trusted_addr, Network.NETWORK.getPort());
                     }
                 };
                 peerGroup.addAddress(OnionAddr);
