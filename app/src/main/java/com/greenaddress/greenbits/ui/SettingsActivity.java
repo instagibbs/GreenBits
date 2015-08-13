@@ -245,21 +245,38 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
 
                 try {
                     SharedPreferences.Editor editor = trustedPreferences.edit();
-                    editor.putString("address", newValue.toString());
+                    editor.putString("address", newString);
                     editor.apply();
 
-                    getGAService().setAppearanceValue("trusted_peer_addr", newValue.toString(), true);
-                    trusted_peer.setSummary(newValue.toString());
-                    new MaterialDialog.Builder(SettingsActivity.this)
-                            .title(getResources().getString(R.string.changingRequiresRestartTitle))
-                            .content(getResources().getString(R.string.changingRequiresRestartText))
-                            .positiveColorRes(R.color.accent)
-                            .negativeColorRes(R.color.white)
-                            .titleColorRes(R.color.white)
-                            .contentColorRes(android.R.color.white)
-                            .theme(Theme.DARK)
-                            .positiveText("OK")
-                            .build().show();
+                    getGAService().setAppearanceValue("trusted_peer_addr", newString, true);
+                    trusted_peer.setSummary(newString);
+
+                    if (newString.equals("") || newString.substring(newString.indexOf('.')).equals(".onion")){
+                        new MaterialDialog.Builder(SettingsActivity.this)
+                                .title(getResources().getString(R.string.changingRequiresRestartTitle))
+                                .content(getResources().getString(R.string.changingRequiresRestartText))
+                                .positiveColorRes(R.color.accent)
+                                .negativeColorRes(R.color.white)
+                                .titleColorRes(R.color.white)
+                                .contentColorRes(android.R.color.white)
+                                .theme(Theme.DARK)
+                                .positiveText("OK")
+                                .build().show();
+                    }
+                    else{
+                        new MaterialDialog.Builder(SettingsActivity.this)
+                                .title(getResources().getString(R.string.changingRequiresRestartWarnOnionTitle))
+                                .content(getResources().getString(R.string.changingRequiresRestartWarnOnionText))
+                                .positiveColorRes(R.color.accent)
+                                .negativeColorRes(R.color.white)
+                                .titleColorRes(R.color.white)
+                                .contentColorRes(android.R.color.white)
+                                .theme(Theme.DARK)
+                                .positiveText("OK")
+                                .build().show();
+                    }
+
+
                     return true;
                 } catch (final Exception e) {
                     // not set
