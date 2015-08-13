@@ -431,6 +431,7 @@ public class TabbedMainActivity extends ActionBarActivity implements ActionBar.T
             //FIXME logout and exit logic
             getGAService().disconnect(false);
             finish();
+            System.exit(0); //UGLY hack until we fix service model.
             return true;
         } else if (id == R.id.action_share) {
             final TextView receiveAddress = (TextView) findViewById(R.id.receiveAddressText);
@@ -465,6 +466,7 @@ public class TabbedMainActivity extends ActionBarActivity implements ActionBar.T
     public void onBackPressed() {
         if (exit) {
             finish(); // finish activity
+            System.exit(0); //Hack until we fix service model.
         } else {
             Toast.makeText(this, "Press Back again to Exit.",
                     Toast.LENGTH_SHORT).show();

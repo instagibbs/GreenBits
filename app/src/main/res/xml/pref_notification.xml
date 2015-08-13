@@ -16,6 +16,6 @@
         android:summary="@string/enableSPVSummary" />
 
     <EditTextPreference android:key="trusted_peer"
-        android:title="Connect to a trusted .onion peer for SPV."
-        android:summary="EXPERIMENTAL" />
+        android:title="@string/trustedspv"
+        />
 </PreferenceScreen>
