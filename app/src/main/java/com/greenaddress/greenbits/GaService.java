@@ -188,7 +188,7 @@ public class GaService extends Service {
             isSpvSyncing = false;
             if (getSharedPreferences("SPV", MODE_PRIVATE).getBoolean("enabled", true)) {
                 String trusted_addr = getSharedPreferences("TRUSTED", MODE_PRIVATE).getString("address", "");
-                if (!trusted_addr.equals("")){
+                if (!trusted_addr.equals("") && trusted_addr.indexOf('.') != -1){
                     if (trusted_addr.substring(trusted_addr.indexOf('.')).equals(".onion")) {
                         setUpSPVOnion();
                     }
