@@ -233,13 +233,13 @@ public class GaService extends Service {
     }
 
     private void toastTrustedSPV(final String announcement){
-        if(TabbedMainActivity.instance != null){
+        final String trusted_peer = getSharedPreferences("TRUSTED", MODE_PRIVATE).getString("address", "");
+        if(TabbedMainActivity.instance != null && !trusted_peer.equals("")){
             TabbedMainActivity.instance.runOnUiThread(new Runnable()
             {
                 @Override
                 public void run()
                 {
-                    final String trusted_peer = getSharedPreferences("TRUSTED", MODE_PRIVATE).getString("address", "");
                     Toast.makeText(getApplicationContext(), announcement+trusted_peer, Toast.LENGTH_SHORT).show();
                 }
             });
