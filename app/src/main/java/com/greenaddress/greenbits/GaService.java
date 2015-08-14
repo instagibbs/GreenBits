@@ -1,5 +1,6 @@
 package com.greenaddress.greenbits;
 
+import com.greenaddress.greenbits.ui.TabbedMainActivity;
 import com.subgraph.orchid.TorClient;
 
 import android.app.Service;
@@ -10,8 +11,10 @@ import android.graphics.Color;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
@@ -93,14 +96,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.Nullable;
 
@@ -234,6 +232,20 @@ public class GaService extends Service {
         return isSpvSyncing;
     }
 
+    private void toastTrustedSPV(final String announcement){
+        if(TabbedMainActivity.instance != null){
+            TabbedMainActivity.instance.runOnUiThread(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    final String trusted_peer = getSharedPreferences("TRUSTED", MODE_PRIVATE).getString("address", "");
+                    Toast.makeText(getApplicationContext(), announcement+trusted_peer, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
     public void startSpvSync() {
         synchronized (startSPVLock) {
             if (syncStarted)
@@ -246,6 +258,7 @@ public class GaService extends Service {
             startSpvAfterInit = true;
             return;
         }
+        toastTrustedSPV("Attempting connection to trusted peer: ");
         Futures.addCallback(peerGroup.startAsync(), new FutureCallback<Object>() {
             @Override
             public void onSuccess(@Nullable Object result) {
@@ -254,6 +267,7 @@ public class GaService extends Service {
                     public void onChainDownloadStarted(Peer peer, int blocksLeft) {
                         isSpvSyncing = true;
                         spvBlocksLeft = blocksLeft;
+                        toastTrustedSPV("Connected to trusted peer: ");
                     }
 
                     @Override
