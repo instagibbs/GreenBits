@@ -629,7 +629,8 @@ public class GaService extends Service {
 
     private void setUpSPVOnion() {
         File blockChainFile = new File(getDir("blockstore_" + receivingId, Context.MODE_PRIVATE), "blockchain.spvchain");
-        System.setProperty("user.home", Environment.getExternalStorageDirectory().toString());// This needs to fire up each time app is started.
+        // This needs to fire up each time app is started, since Orchid needs it to place files.
+        System.setProperty("user.home", getApplicationContext().getFilesDir().toString());
         final String trusted_addr = getSharedPreferences("TRUSTED", MODE_PRIVATE).getString("address", "");
         try {
             blockStore = new SPVBlockStore(Network.NETWORK, blockChainFile);
