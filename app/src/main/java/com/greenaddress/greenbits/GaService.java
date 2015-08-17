@@ -641,11 +641,10 @@ public class GaService extends Service {
             try {
                 org.bitcoinj.core.Context context = new org.bitcoinj.core.Context(Network.NETWORK);
                 peerGroup = PeerGroup.newWithTor(context, blockChain, new TorClient(), false);
+                peerGroup.addPeerFilterProvider(makePeerFilterProvider());
             }catch (Exception e){
                 e.printStackTrace();
-                System.exit(0);
             }
-
             try {
                 PeerAddress OnionAddr = new PeerAddress(InetAddress.getLocalHost(), Network.NETWORK.getPort()) {
                     public InetSocketAddress toSocketAddress() {
