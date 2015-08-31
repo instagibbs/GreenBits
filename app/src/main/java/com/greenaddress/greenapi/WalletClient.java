@@ -10,6 +10,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.SettableFuture;
+import com.subgraph.orchid.TorClient;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -59,6 +60,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import javax.net.SocketFactory;
 
 import de.tavendo.autobahn.Wamp;
 import de.tavendo.autobahn.WampConnection;
@@ -448,7 +450,10 @@ public class WalletClient {
     private ListenableFuture<Void> low_level_connect() {
         final SettableFuture<Void> asyncWamp = SettableFuture.create();
         final String wsuri = Network.GAIT_WAMP_URL;
-        mConnection = new WampConnection();
+        TorClient client = new TorClient();
+        client.start();
+        SocketFactory sf = client.getSocketFactory();
+        mConnection = new WampConnection(sf);
         final WampOptions options = new WampOptions();
         options.setReceiveTextMessagesRaw(true);
         options.setMaxMessagePayloadSize(1024 * 1024);

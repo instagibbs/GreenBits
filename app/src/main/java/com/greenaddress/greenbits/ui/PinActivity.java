@@ -135,6 +135,9 @@ public class PinActivity extends ActionBarActivity implements Observer {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pin);
 
+        //Set for Orchid purposes.
+        System.setProperty("user.home", getApplicationContext().getFilesDir().toString());
+
         final EditText pinText = (EditText) findViewById(R.id.pinText);
         final CircularProgressButton pinLoginButton = (CircularProgressButton) findViewById(R.id.pinLoginButton);
         final TextView pinError = (TextView) findViewById(R.id.pinErrorText);
