@@ -449,7 +449,8 @@ public class WalletClient {
 
     private ListenableFuture<Void> low_level_connect() {
         final SettableFuture<Void> asyncWamp = SettableFuture.create();
-        final String wsuri = Network.GAIT_WAMP_URL;
+        //final String wsuri = Network.GAIT_WAMP_URL;
+        final String wsuri = Network.GAIT_WAMP_URL_ONION;
         TorClient client = new TorClient();
         client.start();
         SocketFactory sf = client.getSocketFactory();
@@ -480,7 +481,8 @@ public class WalletClient {
 
                 m_notificationHandler.onConnectionClosed(code);
                 asyncWamp.setException(new GAException(s));
-
+                Log.d(TAG, s);
+                System.exit(0);
             }
 
             @Override
