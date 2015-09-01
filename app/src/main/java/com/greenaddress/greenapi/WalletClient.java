@@ -453,6 +453,12 @@ public class WalletClient {
         final String wsuri = Network.GAIT_WAMP_URL_ONION;
         TorClient client = new TorClient();
         client.start();
+        try {
+            client.waitUntilReady();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
         SocketFactory sf = client.getSocketFactory();
         mConnection = new WampConnection(sf);
         final WampOptions options = new WampOptions();
