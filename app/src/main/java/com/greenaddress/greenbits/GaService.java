@@ -117,6 +117,7 @@ public class GaService extends Service {
     private ListenableFuture<QrBitmap> latestQrBitmapMnemonics;
     private ListenableFuture<String> latestMnemonics;
     private final Object startSPVLock = new Object();
+    private TorClient tClient;
 
     private boolean reconnect = true, isSpvSyncing = false, startSpvAfterInit = false, syncStarted = false;
 
@@ -601,7 +602,7 @@ public class GaService extends Service {
             else if (mode.equals("onion")) {
                 try {
                     org.bitcoinj.core.Context context = new org.bitcoinj.core.Context(Network.NETWORK);
-                    peerGroup = PeerGroup.newWithTor(context, blockChain, new TorClient(), false);
+                    peerGroup = PeerGroup.newWithTor(context, blockChain, tClient, false);
                     peerGroup.addPeerFilterProvider(makePeerFilterProvider());
                 }catch (Exception e){
                     e.printStackTrace();
@@ -663,6 +664,7 @@ public class GaService extends Service {
         }
         isSpvSyncing = false;
         syncStarted = false;
+        //tClient = new TorClient();
     }
 
     private BlockChainListener makeBlockChainListener() {
