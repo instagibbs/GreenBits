@@ -168,6 +168,8 @@ public class TabbedMainActivity extends ActionBarActivity implements ActionBar.T
         super.onResume();
         getGAApp().getConnectionObservable().addObserver(this);
         testKickedOut();
+        //if(getGAService().getIsSpvSyncing() == true)
+        //    getGAService().startSpvSync();
         instance = this;
         setIdVisible(getGAApp().getConnectionObservable().getState() != ConnectivityObservable.State.LOGGEDIN, R.id.action_share);
     }
@@ -466,7 +468,6 @@ public class TabbedMainActivity extends ActionBarActivity implements ActionBar.T
     public void onBackPressed() {
         if (exit) {
             finish(); // finish activity
-            System.exit(0); //Hack until we fix service model.
         } else {
             Toast.makeText(this, "Press Back again to Exit.",
                     Toast.LENGTH_SHORT).show();

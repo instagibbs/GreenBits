@@ -185,18 +185,7 @@ public class GaService extends Service {
             gaDeterministicKeys = new HashMap<>();
             isSpvSyncing = false;
             if (getSharedPreferences("SPV", MODE_PRIVATE).getBoolean("enabled", true)) {
-                String trusted_addr = getSharedPreferences("TRUSTED", MODE_PRIVATE).getString("address", "");
-                if (!trusted_addr.isEmpty() && trusted_addr.indexOf('.') != -1){
-                    final String trusted_lower = trusted_addr.toLowerCase();
-                    if (trusted_lower.endsWith(".onion") || trusted_lower.indexOf(".onion:" ) != -1) {
-                        setUpSPVOnion();
-                    }
-                    else{
-                        setUpSPVTrusted();
-                    }
-                }else{
-                    setUpSPV();
-                }
+                setUpSPV();
 
                 if (startSpvAfterInit) {
                     startSpvSync();
@@ -247,7 +236,7 @@ public class GaService extends Service {
         }
     }
 
-    public void startSpvSync() {
+    public synchronized void startSpvSync() {
         synchronized (startSPVLock) {
             if (syncStarted)
                 return;
@@ -518,30 +507,7 @@ public class GaService extends Service {
             public void onConnectionClosed(final int code) {
                 gaDeterministicKeys = null;
 
-                if (blockChain != null) {
-                    if (blockChainListener != null) {
-                        blockChain.removeListener(blockChainListener);
-                        blockChainListener = null;
-                    }
-                }
-                if (peerGroup != null) {
-                    if (pfProvider != null) {
-                        peerGroup.removePeerFilterProvider(pfProvider);
-                        pfProvider = null;
-                    }
-
-                    peerGroup.stopAsync();
-                    peerGroup.awaitTerminated();
-                    peerGroup = null;
-                }
-                if (blockStore != null) {
-                    try {
-                        blockStore.close();
-                        blockStore = null;
-                    } catch (final BlockStoreException x) {
-                        throw new RuntimeException(x);
-                    }
-                }
+                stopAndTeardownSPV();
 
 
                 if (code == 4000) {
@@ -572,71 +538,6 @@ public class GaService extends Service {
         }, es);
     }
 
-    private void setUpSPV() {
-        File blockChainFile = new File(getDir("blockstore_" + receivingId, Context.MODE_PRIVATE), "blockchain.spvchain");
-
-        try {
-            blockStore = new SPVBlockStore(Network.NETWORK, blockChainFile);
-            blockStore.getChainHead(); // detect corruptions as early as possible
-
-            blockChain = new BlockChain(Network.NETWORK, blockStore);
-            blockChain.addListener(makeBlockChainListener());
-
-            peerGroup = new PeerGroup(Network.NETWORK, blockChain);
-            peerGroup.addPeerFilterProvider(makePeerFilterProvider());
-
-            if (Network.NETWORK.getId().equals(NetworkParameters.ID_REGTEST)) {
-                try {
-                    peerGroup.addAddress(new PeerAddress(InetAddress.getByName("192.168.2.47"), 19000));
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
-                }
-                peerGroup.setMaxConnections(1);
-            } else {
-                peerGroup.addPeerDiscovery(new DnsDiscovery(Network.NETWORK));
-            }
-        } catch (BlockStoreException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private void setUpSPVTrusted() {
-        File blockChainFile = new File(getDir("blockstore_" + receivingId, Context.MODE_PRIVATE), "blockchain.spvchain");
-        final String trusted_addr = getSharedPreferences("TRUSTED", MODE_PRIVATE).getString("address", "");
-        try {
-            blockStore = new SPVBlockStore(Network.NETWORK, blockChainFile);
-            blockStore.getChainHead(); // detect corruptions as early as possible
-
-            blockChain = new BlockChain(Network.NETWORK, blockStore);
-            blockChain.addListener(makeBlockChainListener());
-
-            peerGroup = new PeerGroup(Network.NETWORK, blockChain);
-            peerGroup.addPeerFilterProvider(makePeerFilterProvider());
-
-            if (Network.NETWORK.getId().equals(NetworkParameters.ID_REGTEST)) {
-                try {
-                    peerGroup.addAddress(new PeerAddress(InetAddress.getByName("192.168.2.47"), 19000));
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                final Node n = new Node(trusted_addr);
-                try {
-                    peerGroup.addAddress(new PeerAddress(InetAddress.getByName(n.addr), n.port));
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
-                }
-
-            }
-            peerGroup.setMaxConnections(1);
-
-        } catch (BlockStoreException e) {
-            e.printStackTrace();
-        }
-
-    }
-
     class Node {
         final String addr;
         final int port;
@@ -653,43 +554,115 @@ public class GaService extends Service {
         }
     }
 
-    private void setUpSPVOnion() {
-        File blockChainFile = new File(getDir("blockstore_" + receivingId, Context.MODE_PRIVATE), "blockchain.spvchain");
-        // This needs to fire up each time app is started, since Orchid needs it to place files.
+    public synchronized void setUpSPV(){
+        //stopAndTearDownSPV must be called if SPV already exists
+        if (peerGroup != null) {
+            Log.d(TAG, "Must stop and tear down SPV before setting up again!");
+            return;
+        }
         System.setProperty("user.home", getApplicationContext().getFilesDir().toString());
-        final String trusted_addr = getSharedPreferences("TRUSTED", MODE_PRIVATE).getString("address", "");
+        String trusted_addr = getSharedPreferences("TRUSTED", MODE_PRIVATE).getString("address", "");
+        String mode = "";
+        if (!trusted_addr.isEmpty() && trusted_addr.indexOf('.') != -1){
+            final String trusted_lower = trusted_addr.toLowerCase();
+            if (trusted_lower.endsWith(".onion") || trusted_lower.indexOf(".onion:" ) != -1) {
+                mode = "onion";
+            }
+            else{
+                mode = "trusted";
+            }
+        }else{
+            mode = "normal";
+        }
+
+        File blockChainFile = new File(getDir("blockstore_" + receivingId, Context.MODE_PRIVATE), "blockchain.spvchain");
+
         try {
             blockStore = new SPVBlockStore(Network.NETWORK, blockChainFile);
             blockStore.getChainHead(); // detect corruptions as early as possible
 
             blockChain = new BlockChain(Network.NETWORK, blockStore);
             blockChain.addListener(makeBlockChainListener());
-            try {
-                org.bitcoinj.core.Context context = new org.bitcoinj.core.Context(Network.NETWORK);
-                peerGroup = PeerGroup.newWithTor(context, blockChain, new TorClient(), false);
-                peerGroup.addPeerFilterProvider(makePeerFilterProvider());
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-            try {
-                final Node n = new Node(trusted_addr);
 
-                final PeerAddress OnionAddr = new PeerAddress(InetAddress.getLocalHost(), n.port ) {
-                    public InetSocketAddress toSocketAddress() {
-                        return InetSocketAddress.createUnresolved(n.addr, n.port);
-                    }
-                };
-                peerGroup.addAddress(OnionAddr);
+            peerGroup = new PeerGroup(Network.NETWORK, blockChain);
+            peerGroup.addPeerFilterProvider(makePeerFilterProvider());
+
+            if (Network.NETWORK.getId().equals(NetworkParameters.ID_REGTEST)) {
+                try {
+                    peerGroup.addAddress(new PeerAddress(InetAddress.getByName("192.168.2.47"), 19000));
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                }
                 peerGroup.setMaxConnections(1);
-
-
-            }catch (Exception e){
-                e.printStackTrace();
             }
+            else if (mode.equals("normal")) {
+                peerGroup.addPeerDiscovery(new DnsDiscovery(Network.NETWORK));
+            }
+            else if (mode.equals("onion")) {
+                try {
+                    org.bitcoinj.core.Context context = new org.bitcoinj.core.Context(Network.NETWORK);
+                    peerGroup = PeerGroup.newWithTor(context, blockChain, new TorClient(), false);
+                    peerGroup.addPeerFilterProvider(makePeerFilterProvider());
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                try {
+                    final Node n = new Node(trusted_addr);
+
+                    final PeerAddress OnionAddr = new PeerAddress(InetAddress.getLocalHost(), n.port ) {
+                        public InetSocketAddress toSocketAddress() {
+                            return InetSocketAddress.createUnresolved(n.addr, n.port);
+                        }
+                    };
+                    peerGroup.addAddress(OnionAddr);
+                    peerGroup.setMaxConnections(1);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+            else if (mode.equals("trusted")) {
+                peerGroup.setMaxConnections(1);
+                final Node n = new Node(trusted_addr);
+                try {
+                    peerGroup.addAddress(new PeerAddress(InetAddress.getByName(n.addr), n.port));
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
         } catch (BlockStoreException e) {
             e.printStackTrace();
         }
+    }
 
+    public synchronized void stopAndTeardownSPV(){
+        if (blockChain != null) {
+            if (blockChainListener != null) {
+                blockChain.removeListener(blockChainListener);
+                blockChainListener = null;
+            }
+        }
+        if (peerGroup != null) {
+            if (pfProvider != null) {
+                peerGroup.removePeerFilterProvider(pfProvider);
+                pfProvider = null;
+            }
+
+            peerGroup.stopAsync();
+            peerGroup.awaitTerminated();
+            peerGroup = null;
+        }
+        if (blockStore != null) {
+            try {
+                blockStore.close();
+                blockStore = null;
+            } catch (final BlockStoreException x) {
+                throw new RuntimeException(x);
+            }
+        }
+        isSpvSyncing = false;
+        syncStarted = false;
     }
 
     private BlockChainListener makeBlockChainListener() {

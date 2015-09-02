@@ -226,6 +226,7 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
                                 .theme(Theme.DARK)
                                 .positiveText("OK")
                                 .build().show();
+
                     }
                     else{
                         new MaterialDialog.Builder(SettingsActivity.this)
@@ -240,6 +241,9 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
                                 .build().show();
                     }
 
+                    getGAService().stopAndTeardownSPV();
+                    getGAService().setUpSPV();
+                    getGAService().startSpvSync();
 
                     return true;
                 } catch (final Exception e) {
