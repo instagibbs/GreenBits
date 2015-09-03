@@ -168,8 +168,6 @@ public class TabbedMainActivity extends ActionBarActivity implements ActionBar.T
         super.onResume();
         getGAApp().getConnectionObservable().addObserver(this);
         testKickedOut();
-        //if(getGAService().getIsSpvSyncing() == true)
-        //    getGAService().startSpvSync();
         instance = this;
         setIdVisible(getGAApp().getConnectionObservable().getState() != ConnectivityObservable.State.LOGGEDIN, R.id.action_share);
     }
