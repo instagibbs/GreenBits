@@ -508,8 +508,8 @@ public class GaService extends Service {
             public void onConnectionClosed(final int code) {
                 gaDeterministicKeys = null;
 
-                stopAndTeardownSPV();
-
+                stopSPV();
+                tearDownSPV();
 
                 if (code == 4000) {
                     connectionObservable.setForcedLoggedOut();
@@ -635,36 +635,6 @@ public class GaService extends Service {
         } catch (BlockStoreException e) {
             e.printStackTrace();
         }
-    }
-
-    public synchronized void stopAndTeardownSPV(){
-        if (blockChain != null) {
-            if (blockChainListener != null) {
-                blockChain.removeListener(blockChainListener);
-                blockChainListener = null;
-            }
-        }
-        if (peerGroup != null) {
-            if (pfProvider != null) {
-                peerGroup.removePeerFilterProvider(pfProvider);
-                pfProvider = null;
-            }
-
-            peerGroup.stopAsync();
-            peerGroup.awaitTerminated();
-            peerGroup = null;
-        }
-        if (blockStore != null) {
-            try {
-                blockStore.close();
-                blockStore = null;
-            } catch (final BlockStoreException x) {
-                throw new RuntimeException(x);
-            }
-        }
-        isSpvSyncing = false;
-        syncStarted = false;
-        //tClient = new TorClient();
     }
 
     public synchronized void stopSPV(){
