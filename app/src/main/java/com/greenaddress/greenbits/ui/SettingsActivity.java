@@ -195,10 +195,17 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
 
                 @Override
                 protected Object doInBackground(Object[] params) {
-                    getGAService().stopAndTeardownSPV();
+                    boolean alreadySyncing = false;
+                    if (getGAService().getIsSpvSyncing()) {
+                        alreadySyncing = true;
+                        getGAService().stopSPV();
+                    }
+                    getGAService().tearDownSPV();
                     System.gc(); //May help save slightly lower heap size devices.
                     getGAService().setUpSPV();
-                    getGAService().startSpvSync();
+                    if(alreadySyncing){
+                        getGAService().startSpvSync();
+                    }
                     return null;
                 }
             }

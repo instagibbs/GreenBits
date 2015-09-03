@@ -667,6 +667,37 @@ public class GaService extends Service {
         //tClient = new TorClient();
     }
 
+    public synchronized void stopSPV(){
+        peerGroup.stopAsync();
+        peerGroup.awaitTerminated();
+        isSpvSyncing = false;
+        syncStarted = false;
+    }
+
+    public synchronized void tearDownSPV(){
+        if (blockChain != null) {
+            if (blockChainListener != null) {
+                blockChain.removeListener(blockChainListener);
+                blockChainListener = null;
+            }
+        }
+        if (peerGroup != null) {
+            if (pfProvider != null) {
+                peerGroup.removePeerFilterProvider(pfProvider);
+                pfProvider = null;
+            }
+            peerGroup = null;
+        }
+        if (blockStore != null) {
+            try {
+                blockStore.close();
+                blockStore = null;
+            } catch (final BlockStoreException x) {
+                throw new RuntimeException(x);
+            }
+        }
+    }
+
     private BlockChainListener makeBlockChainListener() {
         blockChainListener = new BlockChainListener() {
             @Override
