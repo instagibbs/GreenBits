@@ -104,7 +104,8 @@ public class FirstScreenActivity extends ActionBarActivity implements Observer {
             	boolean initialized = false;
 				// Check if the TEE can be connected
 				final LinkedBlockingQueue<Boolean> waitConnected = new LinkedBlockingQueue<Boolean>(1);
-				boolean result = transportFactory.connect(FirstScreenActivity.this, new BTChipTransportFactoryCallback() {
+				boolean result = false;
+				/*boolean result = transportFactory.connect(FirstScreenActivity.this, new BTChipTransportFactoryCallback() {
 
 					@Override
 					public void onConnected(boolean success) {
@@ -115,7 +116,7 @@ public class FirstScreenActivity extends ActionBarActivity implements Observer {
 						}						
 					}
 					
-				});
+				});*/
 				if (result) {
 					try {
 						initialized = waitConnected.poll(CONNECT_TIMEOUT, TimeUnit.MILLISECONDS);

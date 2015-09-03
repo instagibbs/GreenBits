@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
 
 import com.greenaddress.greenbits.ui.TabbedMainActivity;
 
@@ -51,6 +52,10 @@ public class ConnectivityObservable extends Observable {
 
     public void setState(final State state) {
         this.state = state;
+        Log.d("ConnObservable", "STATE SET: "+state.toString());
+        for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
+            System.out.println(ste);
+        }
         if (state == State.LOGGEDIN) {
             this.forcedLoggedout = false;
             this.disconnectTimeout = null;

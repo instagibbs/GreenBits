@@ -602,7 +602,7 @@ public class GaService extends Service {
             else if (mode.equals("onion")) {
                 try {
                     org.bitcoinj.core.Context context = new org.bitcoinj.core.Context(Network.NETWORK);
-                    peerGroup = PeerGroup.newWithTor(context, blockChain, tClient, false);
+                    peerGroup = PeerGroup.newWithTor(context, blockChain, new TorClient(), false);
                     peerGroup.addPeerFilterProvider(makePeerFilterProvider());
                 }catch (Exception e){
                     e.printStackTrace();

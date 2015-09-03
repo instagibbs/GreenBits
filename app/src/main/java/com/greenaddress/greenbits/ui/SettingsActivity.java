@@ -3,6 +3,7 @@ package com.greenaddress.greenbits.ui;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
@@ -189,6 +190,18 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
                 }
                 return addr.isEmpty() || addr.indexOf('.') != -1;
             }
+
+            class SPVAsync extends AsyncTask<Object, Object, Object>{
+
+                @Override
+                protected Object doInBackground(Object[] params) {
+                    getGAService().stopAndTeardownSPV();
+                    System.gc(); //May help save slightly lower heap size devices.
+                    getGAService().setUpSPV();
+                    getGAService().startSpvSync();
+                    return null;
+                }
+            }
             @Override
             public boolean onPreferenceChange(final Preference preference, final Object newValue) {
 
@@ -208,15 +221,10 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
                                 .build().show();
                         return true;
                     }
-                    SharedPreferences.Editor editor = trustedPreferences.edit();
-                    editor.putString("address", newString);
-                    editor.apply();
 
-                    getGAService().setAppearanceValue("trusted_peer_addr", newString, true);
-                    trusted_peer.setSummary(newString);
                     final String newLower = newString.toLowerCase();
                     if (newString.isEmpty() || newLower.endsWith(".onion") || newLower.indexOf(".onion:" ) != -1) {
-                        new MaterialDialog.Builder(SettingsActivity.this)
+                        /*new MaterialDialog.Builder(SettingsActivity.this)
                                 .title(getResources().getString(R.string.changingRequiresRestartTitle))
                                 .content(getResources().getString(R.string.changingRequiresRestartText))
                                 .positiveColorRes(R.color.accent)
@@ -225,11 +233,17 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
                                 .contentColorRes(android.R.color.white)
                                 .theme(Theme.DARK)
                                 .positiveText("OK")
-                                .build().show();
+                                .build().show();*/
+                        SharedPreferences.Editor editor = trustedPreferences.edit();
+                        editor.putString("address", newString);
+                        editor.apply();
 
+                        getGAService().setAppearanceValue("trusted_peer_addr", newString, true);
+                        trusted_peer.setSummary(newString);
+                        new SPVAsync().execute();
                     }
                     else{
-                        new MaterialDialog.Builder(SettingsActivity.this)
+                        /*new MaterialDialog.Builder(SettingsActivity.this)
                                 .title(getResources().getString(R.string.changingRequiresRestartWarnOnionTitle))
                                 .content(getResources().getString(R.string.changingRequiresRestartWarnOnionText))
                                 .positiveColorRes(R.color.accent)
@@ -238,12 +252,42 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
                                 .contentColorRes(android.R.color.white)
                                 .theme(Theme.DARK)
                                 .positiveText("OK")
+                                .build().show();*/
+                        new MaterialDialog.Builder(SettingsActivity.this)
+                                .title(getResources().getString(R.string.spvNoWiFiTitle))
+                                .content(getResources().getString(R.string.spvNoWiFiText))
+                                .positiveText(R.string.spvNoWiFiSyncAnyway)
+                                .negativeText(R.string.spvNoWifiWaitForWiFi)
+                                .positiveColorRes(R.color.accent)
+                                .negativeColorRes(R.color.white)
+                                .titleColorRes(R.color.white)
+                                .contentColorRes(android.R.color.white)
+                                .theme(Theme.DARK)
+                                .callback(new MaterialDialog.ButtonCallback() {
+                                    @Override
+                                    public void onNegative(MaterialDialog materialDialog) {
+
+                                    }
+
+                                    @Override
+                                    public void onPositive(MaterialDialog materialDialog) {
+                                        new SPVAsync().execute();
+                                        SharedPreferences.Editor editor = trustedPreferences.edit();
+                                        editor.putString("address", newString);
+                                        editor.apply();
+
+                                        getGAService().setAppearanceValue("trusted_peer_addr", newString, true);
+                                        trusted_peer.setSummary(newString);
+                                    }
+                                })
                                 .build().show();
                     }
 
-                    getGAService().stopAndTeardownSPV();
+
+
+                    /*getGAService().stopAndTeardownSPV();
                     getGAService().setUpSPV();
-                    getGAService().startSpvSync();
+                    getGAService().startSpvSync();*/
 
                     return true;
                 } catch (final Exception e) {
