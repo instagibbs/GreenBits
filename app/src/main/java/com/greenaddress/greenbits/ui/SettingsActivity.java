@@ -224,16 +224,6 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
 
                     final String newLower = newString.toLowerCase();
                     if (newString.isEmpty() || newLower.endsWith(".onion") || newLower.indexOf(".onion:" ) != -1) {
-                        /*new MaterialDialog.Builder(SettingsActivity.this)
-                                .title(getResources().getString(R.string.changingRequiresRestartTitle))
-                                .content(getResources().getString(R.string.changingRequiresRestartText))
-                                .positiveColorRes(R.color.accent)
-                                .negativeColorRes(R.color.white)
-                                .titleColorRes(R.color.white)
-                                .contentColorRes(android.R.color.white)
-                                .theme(Theme.DARK)
-                                .positiveText("OK")
-                                .build().show();*/
                         SharedPreferences.Editor editor = trustedPreferences.edit();
                         editor.putString("address", newString);
                         editor.apply();
@@ -243,20 +233,10 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
                         new SPVAsync().execute();
                     }
                     else{
-                        /*new MaterialDialog.Builder(SettingsActivity.this)
-                                .title(getResources().getString(R.string.changingRequiresRestartWarnOnionTitle))
-                                .content(getResources().getString(R.string.changingRequiresRestartWarnOnionText))
-                                .positiveColorRes(R.color.accent)
-                                .negativeColorRes(R.color.white)
-                                .titleColorRes(R.color.white)
-                                .contentColorRes(android.R.color.white)
-                                .theme(Theme.DARK)
-                                .positiveText("OK")
-                                .build().show();*/
                         new MaterialDialog.Builder(SettingsActivity.this)
-                                .title(getResources().getString(R.string.changingRequiresRestartWarnOnionTitle))
-                                .content(getResources().getString(R.string.changingRequiresRestartWarnOnionText))
-                                .positiveText("Ok")
+                                .title(getResources().getString(R.string.changingWarnOnionTitle))
+                                .content(getResources().getString(R.string.changingWarnOnionText))
+                                .positiveText("OK")
                                 .negativeText("Cancel")
                                 .positiveColorRes(R.color.accent)
                                 .negativeColorRes(R.color.white)
@@ -282,12 +262,6 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
                                 })
                                 .build().show();
                     }
-
-
-
-                    /*getGAService().stopAndTeardownSPV();
-                    getGAService().setUpSPV();
-                    getGAService().startSpvSync();*/
 
                     return true;
                 } catch (final Exception e) {
