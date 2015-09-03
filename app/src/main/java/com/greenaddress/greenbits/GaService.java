@@ -8,10 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
@@ -508,7 +506,7 @@ public class GaService extends Service {
             public void onConnectionClosed(final int code) {
                 gaDeterministicKeys = null;
 
-                stopSPV();
+                stopSPVSync();
                 tearDownSPV();
 
                 if (code == 4000) {
@@ -556,7 +554,8 @@ public class GaService extends Service {
     }
 
     public synchronized void setUpSPV(){
-        //stopAndTearDownSPV must be called if SPV already exists
+        //teardownSPV must be called if SPV already exists
+        //and stopSPV if previous still running.
         if (peerGroup != null) {
             Log.d(TAG, "Must stop and tear down SPV before setting up again!");
             return;
@@ -637,7 +636,7 @@ public class GaService extends Service {
         }
     }
 
-    public synchronized void stopSPV(){
+    public synchronized void stopSPVSync(){
         peerGroup.stopAsync();
         peerGroup.awaitTerminated();
         isSpvSyncing = false;

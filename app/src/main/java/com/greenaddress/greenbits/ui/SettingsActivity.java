@@ -198,7 +198,7 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
                     boolean alreadySyncing = false;
                     if (getGAService().getIsSpvSyncing()) {
                         alreadySyncing = true;
-                        getGAService().stopSPV();
+                        getGAService().stopSPVSync();
                     }
                     getGAService().tearDownSPV();
                     System.gc(); //May help save slightly lower heap size devices.
