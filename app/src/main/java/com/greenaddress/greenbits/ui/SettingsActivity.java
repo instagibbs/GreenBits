@@ -160,7 +160,15 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
                 editor.apply();
                 trusted_peer.setEnabled((Boolean) newValue);
 
-                new MaterialDialog.Builder(SettingsActivity.this)
+                if((boolean) newValue){
+                    getGAService().setUpSPV();
+                    getGAService().startSpvSync();
+                }else{
+                    getGAService().stopSPVSync();
+                    getGAService().tearDownSPV();
+                }
+
+                /*new MaterialDialog.Builder(SettingsActivity.this)
                         .title(getResources().getString(R.string.changingRequiresRestartTitle))
                         .content(getResources().getString(R.string.changingRequiresRestartText))
                         .positiveColorRes(R.color.accent)
@@ -169,7 +177,7 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
                         .contentColorRes(android.R.color.white)
                         .theme(Theme.DARK)
                         .positiveText("OK")
-                        .build().show();
+                        .build().show();*/
                 return true;
             }
         });
