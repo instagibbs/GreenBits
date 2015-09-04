@@ -552,6 +552,10 @@ public class GaService extends Service {
         }
     }
 
+    private enum SPVMode{
+        ONION, TRUSTED, NORMAL
+    }
+
     public synchronized void setUpSPV(){
         //teardownSPV must be called if SPV already exists
         //and stopSPV if previous still running.
@@ -561,17 +565,17 @@ public class GaService extends Service {
         }
         System.setProperty("user.home", getApplicationContext().getFilesDir().toString());
         String trusted_addr = getSharedPreferences("TRUSTED", MODE_PRIVATE).getString("address", "");
-        String mode = "";
+        SPVMode mode;
         if (!trusted_addr.isEmpty() && trusted_addr.indexOf('.') != -1){
             final String trusted_lower = trusted_addr.toLowerCase();
             if (trusted_lower.endsWith(".onion") || trusted_lower.indexOf(".onion:" ) != -1) {
-                mode = "onion";
+                mode = SPVMode.ONION;
             }
             else{
-                mode = "trusted";
+                mode = SPVMode.TRUSTED;
             }
         }else{
-            mode = "normal";
+            mode = SPVMode.NORMAL;
         }
 
         File blockChainFile = new File(getDir("blockstore_" + receivingId, Context.MODE_PRIVATE), "blockchain.spvchain");
@@ -594,10 +598,10 @@ public class GaService extends Service {
                 }
                 peerGroup.setMaxConnections(1);
             }
-            else if (mode.equals("normal")) {
+            else if (mode == SPVMode.NORMAL) {
                 peerGroup.addPeerDiscovery(new DnsDiscovery(Network.NETWORK));
             }
-            else if (mode.equals("onion")) {
+            else if (mode == SPVMode.ONION) {
                 try {
                     org.bitcoinj.core.Context context = new org.bitcoinj.core.Context(Network.NETWORK);
                     peerGroup = PeerGroup.newWithTor(context, blockChain, new TorClient(), false);
@@ -619,7 +623,7 @@ public class GaService extends Service {
                     e.printStackTrace();
                 }
             }
-            else if (mode.equals("trusted")) {
+            else if (mode == SPVMode.TRUSTED) {
                 peerGroup.setMaxConnections(1);
                 final Node n = new Node(trusted_addr);
                 try {
