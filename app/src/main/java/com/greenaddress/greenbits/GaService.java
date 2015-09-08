@@ -12,6 +12,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.common.base.Function;
@@ -43,9 +49,12 @@ import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.DownloadProgressTracker;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.FilteredBlock;
+import org.bitcoinj.core.GetDataMessage;
+import org.bitcoinj.core.Message;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Peer;
 import org.bitcoinj.core.PeerAddress;
+import org.bitcoinj.core.PeerEventListener;
 import org.bitcoinj.core.PeerFilterProvider;
 import org.bitcoinj.core.PeerGroup;
 import org.bitcoinj.core.ScriptException;
@@ -57,6 +66,7 @@ import org.bitcoinj.core.TransactionOutPoint;
 import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.core.Utils;
 import org.bitcoinj.core.VerificationException;
+import org.bitcoinj.core.VersionMessage;
 import org.bitcoinj.core.Wallet;
 import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -89,6 +99,7 @@ import java.util.Comparator;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -134,6 +145,8 @@ public class GaService extends Service {
     private BlockChain blockChain;
     private BlockChainListener blockChainListener;
     private PeerGroup peerGroup;
+    private ArrayList<PrettyPeer> peerList = new ArrayList<PrettyPeer>();
+    public ArrayAdapter<PrettyPeer> peerListAdapter;
     private PeerFilterProvider pfProvider;
 
     private Map<TransactionOutPoint, Long> unspentOutpointsSubaccounts;
@@ -644,6 +657,97 @@ public class GaService extends Service {
         } catch (BlockStoreException e) {
             e.printStackTrace();
         }
+        peerListAdapter =
+                new ArrayAdapter<PrettyPeer>(this, android.R.layout.simple_list_item_1, peerList){
+                    @Override
+                    public View getView(int position, View convertView,
+                                        ViewGroup parent) {
+                        View view =super.getView(position, convertView, parent);
+                        TextView textView=(TextView) view.findViewById(android.R.id.text1);
+                        textView.setTextColor(Color.BLACK); //Force black text.
+                        return view;
+                    };};;
+        peerGroup.addEventListener(new PeerEventListener() {
+            @Override
+            public void onPeersDiscovered(Set<PeerAddress> peerAddresses) {
+
+            }
+
+            @Override
+            public void onBlocksDownloaded(Peer peer, Block block, @Nullable FilteredBlock filteredBlock, int blocksLeft) {
+
+            }
+
+            @Override
+            public void onChainDownloadStarted(Peer peer, int blocksLeft) {
+
+            }
+
+            @Override
+            public void onPeerConnected(final Peer peer, int peerCount) {
+
+                /*for (PrettyPeer ppeer : peerList){
+                    if (new_ppeer.peer == ppeer.peer){
+
+                    }
+                }
+                if (!peerList.contains(peer)) {
+                    peerList.add(new PrettyPeer(Network.NETWORK, peer.getPeerVersionMessage(), null, peer.getAddress()));
+                }*/
+                if(TabbedMainActivity.instance != null){
+                    TabbedMainActivity.instance.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            PrettyPeer new_ppeer = new PrettyPeer(peer);
+                            peerList.add(new_ppeer);
+                            peerListAdapter.notifyDataSetChanged();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onPeerDisconnected(final Peer peer, int peerCount) {
+
+                /*for (PrettyPeer ppeer : peerList){
+
+                }*/
+                /*if (peerList.indexOf(peer) != -1) {
+                    peerList.remove(peerList.indexOf(peer));
+                }*/
+                if(TabbedMainActivity.instance != null){
+                    TabbedMainActivity.instance.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            PrettyPeer new_ppeer = new PrettyPeer(peer);
+                            for(Iterator<PrettyPeer> it = peerList.iterator(); it.hasNext();){
+                                PrettyPeer ppeer = it.next();
+                                if(new_ppeer.peer == ppeer.peer){
+                                    peerList.remove(peerList.indexOf(ppeer));
+                                }
+                            }
+                            peerListAdapter.notifyDataSetChanged();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public Message onPreMessageReceived(Peer peer, Message m) {
+                return null;
+            }
+
+            @Override
+            public void onTransaction(Peer peer, Transaction t) {
+
+            }
+
+            @Nullable
+            @Override
+            public List<Message> getData(Peer peer, GetDataMessage m) {
+                return null;
+            }
+        });
     }
 
     public synchronized void stopSPVSync(){
@@ -651,6 +755,7 @@ public class GaService extends Service {
         peerGroup.awaitTerminated();
         isSpvSyncing = false;
         syncStarted = false;
+        peerList.clear();
     }
 
     public synchronized void tearDownSPV(){
@@ -675,6 +780,7 @@ public class GaService extends Service {
                 throw new RuntimeException(x);
             }
         }
+        peerList.clear();
     }
 
     private BlockChainListener makeBlockChainListener() {
@@ -1467,6 +1573,22 @@ public class GaService extends Service {
         @Override
         public void setChanged() {
             super.setChanged();
+        }
+    }
+
+    public ArrayList<PrettyPeer> getPeerGroup(){
+        return this.peerList;
+    }
+
+    private class PrettyPeer{
+
+        Peer peer;
+        public PrettyPeer(Peer peer) {
+            this.peer = peer;
+        }
+
+        public String toString(){
+            return peer.toString()+" super";
         }
     }
 }
