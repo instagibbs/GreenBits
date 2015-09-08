@@ -25,8 +25,11 @@ import android.support.v13.app.FragmentStatePagerAdapter;
 import android.support.v7.app.ActionBar;
 import android.support.v4.view.ViewPager;
 import android.view.MenuItem;
+
+import com.greenaddress.greenbits.ui.R;
+
 import de.schildbach.wallet.util.ViewPagerTabs;
-import de.schildbach.wallet_test.R;
+//import de.schildbach.wallet_test.R;
 
 /**
  * @author Andreas Schildbach
@@ -41,7 +44,7 @@ public final class NetworkMonitorActivity extends Activity
     {
         //super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.network_monitor_content);
+        setContentView(R.layout.activity_network);
 
         final ViewPager pager = (ViewPager) findViewById(R.id.network_monitor_pager);
 
@@ -57,7 +60,7 @@ public final class NetworkMonitorActivity extends Activity
             pager.setAdapter(pagerAdapter);
             pager.setOnPageChangeListener(pagerTabs);
             pager.setPageMargin(2);
-            pager.setPageMarginDrawable(R.color.bg_less_bright);
+            pager.setPageMarginDrawable(R.color.whiteSecondary);
 
             peerListFragment = new PeerListFragment();
             blockListFragment = new BlockListFragment();
