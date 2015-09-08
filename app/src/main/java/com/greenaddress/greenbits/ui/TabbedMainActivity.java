@@ -442,6 +442,9 @@ public class TabbedMainActivity extends ActionBarActivity implements ActionBar.T
 
             return true;
         }
+        else if (id == R.id.action_network){
+            Toast.makeText(TabbedMainActivity.this, getGAApp().getConnectionObservable().getState().toString(), Toast.LENGTH_LONG).show();
+        }
         return super.onOptionsItemSelected(item);
     }
 

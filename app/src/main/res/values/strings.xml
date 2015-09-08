@@ -42,6 +42,8 @@
     <string name="cancel">CANCEL</string>
     <string name="attemptsLeft">%s attempts left</string>
 
+    <string name="action_network">Network monitor</string>
+
     <string-array name="twoFactorChoices">
         <item>Email</item>
         <item>SMS</item>

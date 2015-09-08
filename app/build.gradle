@@ -71,6 +71,7 @@ dependencies {
     compile 'com.github.dmytrodanylyk.circular-progress-button:library:1.1.3'
     compile 'com.android.support:support-v4:23.0.1'
     compile 'com.android.support:appcompat-v7:23.0.1'
+    compile 'com.android.support:support-v13:22.0.0'
     compile 'com.google.zxing:core:3.2.0'
     compile project (':app:material-dialogs:library'), project (':bitcoinj'), project (':bitcoinj:core')
     compile 'com.google.protobuf:protobuf-java:2.6.1'
