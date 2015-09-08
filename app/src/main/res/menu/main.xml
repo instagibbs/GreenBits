@@ -42,6 +42,12 @@
         android:title="@string/action_exit"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_network"
+        android:orderInCategory="70"
+        android:title="@string/action_network"
+        app:showAsAction="never" />
+
 
 
     <item
