@@ -55,6 +55,7 @@ import com.greenaddress.greenbits.ui.R;
 
 import de.schildbach.wallet.service.BlockchainService;
 import de.schildbach.wallet.service.BlockchainServiceImpl;
+import de.schildbach.wallet.util.FancyListFragment;
 import de.schildbach.wallet.util.WholeStringBuilder;
 //import de.schildbach.wallet_test.R;
 

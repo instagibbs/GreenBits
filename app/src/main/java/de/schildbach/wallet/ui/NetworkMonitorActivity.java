@@ -42,7 +42,7 @@ public final class NetworkMonitorActivity extends Activity
     @Override
     protected void onCreate(final Bundle savedInstanceState)
     {
-        //super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_network);
 
