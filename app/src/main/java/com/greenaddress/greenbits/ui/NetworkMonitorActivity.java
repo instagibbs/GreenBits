@@ -15,18 +15,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.schildbach.wallet.ui;
+package com.greenaddress.greenbits.ui;
 
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v13.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.view.ViewPager;
+import android.text.Editable;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.ListView;
 
+import com.greenaddress.greenbits.GaService;
+import com.greenaddress.greenbits.GreenAddressApplication;
+import com.greenaddress.greenbits.ui.PeerListFragment;
 import com.greenaddress.greenbits.ui.R;
+
+import org.bitcoinj.core.Peer;
+import org.bitcoinj.core.PeerGroup;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import de.schildbach.wallet.util.ViewPagerTabs;
 //import de.schildbach.wallet_test.R;
@@ -34,10 +48,10 @@ import de.schildbach.wallet.util.ViewPagerTabs;
 /**
  * @author Andreas Schildbach
  */
-public final class NetworkMonitorActivity extends Activity
+public final class NetworkMonitorActivity extends FragmentActivity
 {
     private PeerListFragment peerListFragment;
-    private BlockListFragment blockListFragment;
+    //private BlockListFragment blockListFragment;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState)
@@ -46,6 +60,21 @@ public final class NetworkMonitorActivity extends Activity
 
         setContentView(R.layout.activity_network);
 
+        EditText txt = (EditText) findViewById(R.id.edit_message);
+        Editable edit = txt.getText();
+        edit.clear();
+        edit.append("newstring");
+        ArrayList<String> items = new ArrayList<String>();
+        //PeerGroup group = this.getGAApp().gaService.getPeerGroup();
+        //List<Peer> peers = this.getGAApp().gaService.getPeerGroup().getConnectedPeers();
+        //for(Peer peer : peers){
+        //    items.add(peer.toString());
+        //}
+        //items.add(0, "Hello");
+        //items.add(1, "There");
+        //System.out.println(peers.size());
+
+/*
         final ViewPager pager = (ViewPager) findViewById(R.id.network_monitor_pager);
 
         final FragmentManager fm = getFragmentManager();
@@ -62,14 +91,14 @@ public final class NetworkMonitorActivity extends Activity
             pager.setPageMargin(2);
             pager.setPageMarginDrawable(R.color.whiteSecondary);
 
-            peerListFragment = new PeerListFragment();
-            blockListFragment = new BlockListFragment();
+            //peerListFragment = new PeerListFragment();
+            //blockListFragment = new BlockListFragment();
         }
         else
         {
-            peerListFragment = (PeerListFragment) fm.findFragmentById(R.id.peer_list_fragment);
-            blockListFragment = (BlockListFragment) fm.findFragmentById(R.id.block_list_fragment);
-        }
+            //peerListFragment = (PeerListFragment) fm.findFragmentById(R.id.peer_list_fragment);
+            //blockListFragment = (BlockListFragment) fm.findFragmentById(R.id.block_list_fragment);
+        }*/
     }
 /*
     @Override
@@ -101,10 +130,19 @@ public final class NetworkMonitorActivity extends Activity
         @Override
         public Fragment getItem(final int position)
         {
-            if (position == 0)
-                return peerListFragment;
-            else
-                return blockListFragment;
+            //if (position == 0)
+            //    return peerListFragment;
+            //else
+            //    return peerListFragment; //For now just the one.
+            return null;
         }
+    }
+
+    protected GreenAddressApplication getGAApp() {
+        return (GreenAddressApplication) getApplication();
+    }
+
+    protected GaService getGAService() {
+        return getGAApp().gaService;
     }
 }

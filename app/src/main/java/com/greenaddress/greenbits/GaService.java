@@ -12,6 +12,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.common.base.Function;
@@ -43,9 +45,12 @@ import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.DownloadProgressTracker;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.FilteredBlock;
+import org.bitcoinj.core.GetDataMessage;
+import org.bitcoinj.core.Message;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Peer;
 import org.bitcoinj.core.PeerAddress;
+import org.bitcoinj.core.PeerEventListener;
 import org.bitcoinj.core.PeerFilterProvider;
 import org.bitcoinj.core.PeerGroup;
 import org.bitcoinj.core.ScriptException;
@@ -134,6 +139,7 @@ public class GaService extends Service {
     private BlockChain blockChain;
     private BlockChainListener blockChainListener;
     private PeerGroup peerGroup;
+    private ArrayList<Peer> peerList = new ArrayList<Peer>();
     private PeerFilterProvider pfProvider;
 
     private Map<TransactionOutPoint, Long> unspentOutpointsSubaccounts;
@@ -637,6 +643,57 @@ public class GaService extends Service {
         } catch (BlockStoreException e) {
             e.printStackTrace();
         }
+        ArrayAdapter<Peer> itemsAdapter =
+                new ArrayAdapter<Peer>(this, android.R.layout.simple_list_item_1, this.getPeerGroup());
+        ListView view = (ListView) this.getApplication().findViewById(R.id.tinkle);
+        view.setAdapter(itemsAdapter);
+
+        peerGroup.addEventListener(new PeerEventListener() {
+            @Override
+            public void onPeersDiscovered(Set<PeerAddress> peerAddresses) {
+
+            }
+
+            @Override
+            public void onBlocksDownloaded(Peer peer, Block block, @Nullable FilteredBlock filteredBlock, int blocksLeft) {
+
+            }
+
+            @Override
+            public void onChainDownloadStarted(Peer peer, int blocksLeft) {
+
+            }
+
+            @Override
+            public void onPeerConnected(Peer peer, int peerCount) {
+                if(!peerList.contains(peer)){
+                    peerList.add(peer);
+                }
+            }
+
+            @Override
+            public void onPeerDisconnected(Peer peer, int peerCount) {
+                if(peerList.indexOf(peer) != -1){
+                    peerList.remove(peerList.indexOf(peer));
+                }
+            }
+
+            @Override
+            public Message onPreMessageReceived(Peer peer, Message m) {
+                return null;
+            }
+
+            @Override
+            public void onTransaction(Peer peer, Transaction t) {
+
+            }
+
+            @Nullable
+            @Override
+            public List<Message> getData(Peer peer, GetDataMessage m) {
+                return null;
+            }
+        });
     }
 
     public synchronized void stopSPVSync(){
@@ -1461,5 +1518,9 @@ public class GaService extends Service {
         public void setChanged() {
             super.setChanged();
         }
+    }
+
+    public ArrayList<Peer> getPeerGroup(){
+        return this.peerList;
     }
 }
