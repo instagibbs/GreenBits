@@ -105,6 +105,7 @@
     <string name="txHashText">Hash</string>
     <string name="txRecipientText">Recipient</string>
     <string name="txMemoText">Memo</string>
+    <string name="title_network_monitor">Network monitor</string>
 
     <!-- Example settings for Notifications -->
     <string name="pref_header_notifications">GreenBits</string>

@@ -4,19 +4,10 @@
 	android:layout_height="match_parent"
 	android:orientation="vertical" >
 
-	<de.schildbach.wallet.util.ViewPagerTabs
-		android:id="@+id/network_monitor_pager_tabs"
+	<fragment android:name="com.greenaddress.greenbits.ui.PeerListFragment"
+		android:id="@+id/peer_list_fragment"
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:background="@color/whiteSecondary"
-		android:paddingBottom="4dp"
-		android:paddingTop="4dp" />
-
-	<android.support.v4.view.ViewPager
-		android:id="@+id/network_monitor_pager"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_gravity="bottom|center_horizontal"
-		android:background="@color/white" />
+		android:layout_height="match_parent"
+		/>
 
 </LinearLayout>
