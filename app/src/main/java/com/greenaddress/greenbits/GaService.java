@@ -12,8 +12,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.common.base.Function;
@@ -140,6 +144,7 @@ public class GaService extends Service {
     private BlockChainListener blockChainListener;
     private PeerGroup peerGroup;
     private ArrayList<Peer> peerList = new ArrayList<Peer>();
+    public ArrayAdapter<Peer> peerListAdapter;
     private PeerFilterProvider pfProvider;
 
     private Map<TransactionOutPoint, Long> unspentOutpointsSubaccounts;
@@ -484,6 +489,17 @@ public class GaService extends Service {
             editor.apply();
         }
 
+        peerListAdapter =
+                new ArrayAdapter<Peer>(this, android.R.layout.simple_list_item_1, peerList){
+                    @Override
+                    public View getView(int position, View convertView,
+                                        ViewGroup parent) {
+                        View view =super.getView(position, convertView, parent);
+                        TextView textView=(TextView) view.findViewById(android.R.id.text1);
+                        textView.setTextColor(Color.BLACK); //Force black text.
+                        return view;
+                    };};;
+
         client = new WalletClient(new INotificationHandler() {
             @Override
             public void onNewBlock(final long count) {
@@ -643,11 +659,6 @@ public class GaService extends Service {
         } catch (BlockStoreException e) {
             e.printStackTrace();
         }
-        ArrayAdapter<Peer> itemsAdapter =
-                new ArrayAdapter<Peer>(this, android.R.layout.simple_list_item_1, this.getPeerGroup());
-        ListView view = (ListView) this.getApplication().findViewById(R.id.tinkle);
-        view.setAdapter(itemsAdapter);
-
         peerGroup.addEventListener(new PeerEventListener() {
             @Override
             public void onPeersDiscovered(Set<PeerAddress> peerAddresses) {
@@ -666,15 +677,31 @@ public class GaService extends Service {
 
             @Override
             public void onPeerConnected(Peer peer, int peerCount) {
-                if(!peerList.contains(peer)){
+                if (!peerList.contains(peer)) {
                     peerList.add(peer);
+                }
+                if(TabbedMainActivity.instance != null){
+                    TabbedMainActivity.instance.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            peerListAdapter.notifyDataSetChanged();
+                        }
+                    });
                 }
             }
 
             @Override
             public void onPeerDisconnected(Peer peer, int peerCount) {
-                if(peerList.indexOf(peer) != -1){
+                if (peerList.indexOf(peer) != -1) {
                     peerList.remove(peerList.indexOf(peer));
+                }
+                if(TabbedMainActivity.instance != null){
+                    TabbedMainActivity.instance.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            peerListAdapter.notifyDataSetChanged();
+                        }
+                    });
                 }
             }
 
@@ -701,6 +728,7 @@ public class GaService extends Service {
         peerGroup.awaitTerminated();
         isSpvSyncing = false;
         syncStarted = false;
+        peerList.clear();
     }
 
     public synchronized void tearDownSPV(){
@@ -725,6 +753,7 @@ public class GaService extends Service {
                 throw new RuntimeException(x);
             }
         }
+        peerList.clear();
     }
 
     private BlockChainListener makeBlockChainListener() {

@@ -106,10 +106,10 @@
             android:label="@string/title_activity_qr_scanner"
             android:screenOrientation="landscape" />
         <activity
-            android:name=".SettingsActivity"
+            android:name=".NetworkMonitorActivity"
             android:label="@string/title_network_monitor" />
         <activity
-            android:name=".NetworkMonitorActivity"
+            android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" />
         <activity
             android:name=".RequestLoginActivity"

@@ -60,82 +60,8 @@ public final class NetworkMonitorActivity extends FragmentActivity
 
         setContentView(R.layout.activity_network);
 
-        EditText txt = (EditText) findViewById(R.id.edit_message);
-        Editable edit = txt.getText();
-        edit.clear();
-        edit.append("newstring");
-        ArrayList<String> items = new ArrayList<String>();
-        //PeerGroup group = this.getGAApp().gaService.getPeerGroup();
-        //List<Peer> peers = this.getGAApp().gaService.getPeerGroup().getConnectedPeers();
-        //for(Peer peer : peers){
-        //    items.add(peer.toString());
-        //}
-        //items.add(0, "Hello");
-        //items.add(1, "There");
-        //System.out.println(peers.size());
-
-/*
-        final ViewPager pager = (ViewPager) findViewById(R.id.network_monitor_pager);
-
-        final FragmentManager fm = getFragmentManager();
-
-        if (pager != null)
-        {
-            final ViewPagerTabs pagerTabs = (ViewPagerTabs) findViewById(R.id.network_monitor_pager_tabs);
-            pagerTabs.addTabLabels(R.string.network_monitor_peer_list_title, R.string.network_monitor_block_list_title);
-
-            final PagerAdapter pagerAdapter = new PagerAdapter(fm);
-
-            pager.setAdapter(pagerAdapter);
-            pager.setOnPageChangeListener(pagerTabs);
-            pager.setPageMargin(2);
-            pager.setPageMarginDrawable(R.color.whiteSecondary);
-
-            //peerListFragment = new PeerListFragment();
-            //blockListFragment = new BlockListFragment();
-        }
-        else
-        {
-            //peerListFragment = (PeerListFragment) fm.findFragmentById(R.id.peer_list_fragment);
-            //blockListFragment = (BlockListFragment) fm.findFragmentById(R.id.block_list_fragment);
-        }*/
-    }
-/*
-    @Override
-    public boolean onOptionsItemSelected(final MenuItem item)
-    {
-        switch (item.getItemId())
-        {
-            case android.R.id.home:
-                finish();
-                return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }*/
-
-    private class PagerAdapter extends FragmentStatePagerAdapter
-    {
-        public PagerAdapter(final FragmentManager fm)
-        {
-            super(fm);
-        }
-
-        @Override
-        public int getCount()
-        {
-            return 2;
-        }
-
-        @Override
-        public Fragment getItem(final int position)
-        {
-            //if (position == 0)
-            //    return peerListFragment;
-            //else
-            //    return peerListFragment; //For now just the one.
-            return null;
-        }
+        ListView view = (ListView) findViewById(R.id.peerlistview);
+        view.setAdapter(getGAService().peerListAdapter);
     }
 
     protected GreenAddressApplication getGAApp() {
