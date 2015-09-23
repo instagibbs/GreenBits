@@ -17,33 +17,12 @@
 
 package com.greenaddress.greenbits.ui;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.os.Bundle;
-import android.support.v13.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.view.ViewPager;
-import android.text.Editable;
-import android.view.MenuItem;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 
 import com.greenaddress.greenbits.GaService;
 import com.greenaddress.greenbits.GreenAddressApplication;
-import com.greenaddress.greenbits.ui.PeerListFragment;
-import com.greenaddress.greenbits.ui.R;
-
-import org.bitcoinj.core.Peer;
-import org.bitcoinj.core.PeerGroup;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import de.schildbach.wallet.util.ViewPagerTabs;
-//import de.schildbach.wallet_test.R;
 
 /**
  * @author Andreas Schildbach
