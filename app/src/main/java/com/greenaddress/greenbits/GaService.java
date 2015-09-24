@@ -66,6 +66,7 @@ import org.bitcoinj.core.TransactionOutPoint;
 import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.core.Utils;
 import org.bitcoinj.core.VerificationException;
+import org.bitcoinj.core.VersionMessage;
 import org.bitcoinj.core.Wallet;
 import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -98,6 +99,7 @@ import java.util.Comparator;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -143,8 +145,8 @@ public class GaService extends Service {
     private BlockChain blockChain;
     private BlockChainListener blockChainListener;
     private PeerGroup peerGroup;
-    private ArrayList<Peer> peerList = new ArrayList<Peer>();
-    public ArrayAdapter<Peer> peerListAdapter;
+    private ArrayList<PrettyPeer> peerList = new ArrayList<PrettyPeer>();
+    public ArrayAdapter<PrettyPeer> peerListAdapter;
     private PeerFilterProvider pfProvider;
 
     private Map<TransactionOutPoint, Long> unspentOutpointsSubaccounts;
@@ -489,17 +491,6 @@ public class GaService extends Service {
             editor.apply();
         }
 
-        peerListAdapter =
-                new ArrayAdapter<Peer>(this, android.R.layout.simple_list_item_1, peerList){
-                    @Override
-                    public View getView(int position, View convertView,
-                                        ViewGroup parent) {
-                        View view =super.getView(position, convertView, parent);
-                        TextView textView=(TextView) view.findViewById(android.R.id.text1);
-                        textView.setTextColor(Color.BLACK); //Force black text.
-                        return view;
-                    };};;
-
         client = new WalletClient(new INotificationHandler() {
             @Override
             public void onNewBlock(final long count) {
@@ -659,6 +650,16 @@ public class GaService extends Service {
         } catch (BlockStoreException e) {
             e.printStackTrace();
         }
+        peerListAdapter =
+                new ArrayAdapter<PrettyPeer>(this, android.R.layout.simple_list_item_1, peerList){
+                    @Override
+                    public View getView(int position, View convertView,
+                                        ViewGroup parent) {
+                        View view =super.getView(position, convertView, parent);
+                        TextView textView=(TextView) view.findViewById(android.R.id.text1);
+                        textView.setTextColor(Color.BLACK); //Force black text.
+                        return view;
+                    };};;
         peerGroup.addEventListener(new PeerEventListener() {
             @Override
             public void onPeersDiscovered(Set<PeerAddress> peerAddresses) {
@@ -676,14 +677,22 @@ public class GaService extends Service {
             }
 
             @Override
-            public void onPeerConnected(Peer peer, int peerCount) {
-                if (!peerList.contains(peer)) {
-                    peerList.add(peer);
+            public void onPeerConnected(final Peer peer, int peerCount) {
+
+                /*for (PrettyPeer ppeer : peerList){
+                    if (new_ppeer.peer == ppeer.peer){
+
+                    }
                 }
+                if (!peerList.contains(peer)) {
+                    peerList.add(new PrettyPeer(Network.NETWORK, peer.getPeerVersionMessage(), null, peer.getAddress()));
+                }*/
                 if(TabbedMainActivity.instance != null){
                     TabbedMainActivity.instance.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            PrettyPeer new_ppeer = new PrettyPeer(peer);
+                            peerList.add(new_ppeer);
                             peerListAdapter.notifyDataSetChanged();
                         }
                     });
@@ -691,14 +700,25 @@ public class GaService extends Service {
             }
 
             @Override
-            public void onPeerDisconnected(Peer peer, int peerCount) {
-                if (peerList.indexOf(peer) != -1) {
+            public void onPeerDisconnected(final Peer peer, int peerCount) {
+
+                /*for (PrettyPeer ppeer : peerList){
+
+                }*/
+                /*if (peerList.indexOf(peer) != -1) {
                     peerList.remove(peerList.indexOf(peer));
-                }
+                }*/
                 if(TabbedMainActivity.instance != null){
                     TabbedMainActivity.instance.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            PrettyPeer new_ppeer = new PrettyPeer(peer);
+                            for(Iterator<PrettyPeer> it = peerList.iterator(); it.hasNext();){
+                                PrettyPeer ppeer = it.next();
+                                if(new_ppeer.peer == ppeer.peer){
+                                    peerList.remove(peerList.indexOf(ppeer));
+                                }
+                            }
                             peerListAdapter.notifyDataSetChanged();
                         }
                     });
@@ -1549,7 +1569,19 @@ public class GaService extends Service {
         }
     }
 
-    public ArrayList<Peer> getPeerGroup(){
+    public ArrayList<PrettyPeer> getPeerGroup(){
         return this.peerList;
+    }
+
+    private class PrettyPeer{
+
+        Peer peer;
+        public PrettyPeer(Peer peer) {
+            this.peer = peer;
+        }
+
+        public String toString(){
+            return peer.toString()+" super";
+        }
     }
 }

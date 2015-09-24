@@ -6,9 +6,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
 
 import com.greenaddress.greenbits.ui.TabbedMainActivity;
 
+import java.util.Objects;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.Callable;
@@ -26,6 +28,8 @@ public class ConnectivityObservable extends Observable {
     private State state = State.OFFLINE;
     private boolean forcedLoggedout = false;
     private boolean forcedTimeoutout = false;
+    private static final String TAG = "ConnectivityObservable";
+    private static Object stopClockLock = new Object();
     private final BroadcastReceiver mNetBroadReceiver = new BroadcastReceiver() {
         public void onReceive(final Context context, final Intent intent) {
             checkNetwork();
@@ -53,6 +57,11 @@ public class ConnectivityObservable extends Observable {
         this.state = state;
         if (state == State.LOGGEDIN) {
             this.forcedLoggedout = false;
+            //if (this.disconnectTimeout != null){
+            //    this.disconnectTimeout.cancel(false);
+            //}
+            Log.d(TAG, "**Disconnect being set to null");
+            this.stopTimer();
             this.disconnectTimeout = null;
             this.forcedTimeoutout = false;
         }
@@ -101,35 +110,53 @@ public class ConnectivityObservable extends Observable {
     }
 
     private void stopTimer() {
-        if (service != null) {
-            if (disconnectTimeout != null && !disconnectTimeout.isCancelled()) {
-                disconnectTimeout.cancel(false);
+        //synchronized (stopClockLock) {
+            Log.d(TAG, "** Timeout count-down stopping **");
+            for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
+                System.out.println(ste);
             }
-        }
+            if (service != null) {
+                Log.d(TAG, "** Timeout count-down stopping because service exists **");
+                if (disconnectTimeout != null && !disconnectTimeout.isCancelled()) {
+                    disconnectTimeout.cancel(false);
+                    Log.d(TAG, "** Timeout count-down stopped **");
+                } else {
+                    Log.d(TAG, "** Timeout count-down:" + disconnectTimeout);
+                }
+            }
+       // }
     }
 
     private void startTimer() {
+        //synchronized (stopClockLock) {
+            if (service != null) {
 
-        if (service != null) {
-
-            int timeout = 5;
-            try {
-                timeout = (int) service.getAppearanceValue("altimeout");
-            } catch (final Exception e) {
-                // not logged in or not set
-            }
-
-            disconnectTimeout = ex.schedule(new Callable<Object>() {
-                @Override
-                public Object call() throws Exception {
-                    forcedTimeoutout = true;
-                    service.disconnect(false);
-                    setChanged();
-                    notifyObservers();
-                    return null;
+                int timeout = 15;
+                try {
+                    timeout = (int) service.getAppearanceValue("altimeout");
+                } catch (final Exception e) {
+                    // not logged in or not set
                 }
-            }, timeout, TimeUnit.MINUTES);
-        }
+                Log.d(TAG, "** Timeout count-down initiated **");
+                for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
+                    System.out.println(ste);
+                }
+                disconnectTimeout = ex.schedule(new Callable<Object>() {
+                    @Override
+                    public Object call() throws Exception {
+                        Log.d(TAG, "** Timeout count-down completed **");
+                        for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
+                            System.out.println(ste);
+                        }
+                        forcedTimeoutout = true;
+                        service.disconnect(false);
+                        setChanged();
+                        notifyObservers();
+                        return null;
+                    }
+                }, timeout, TimeUnit.SECONDS);
+            }
+       // }
     }
 
     private void checkNetwork() {

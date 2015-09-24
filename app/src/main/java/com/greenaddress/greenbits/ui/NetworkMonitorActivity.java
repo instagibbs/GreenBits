@@ -24,10 +24,13 @@ import android.widget.ListView;
 import com.greenaddress.greenbits.GaService;
 import com.greenaddress.greenbits.GreenAddressApplication;
 
+import java.util.Observable;
+import java.util.Observer;
+
 /**
  * @author Andreas Schildbach
  */
-public final class NetworkMonitorActivity extends FragmentActivity
+public final class NetworkMonitorActivity extends FragmentActivity implements Observer
 {
     private PeerListFragment peerListFragment;
     //private BlockListFragment blockListFragment;
@@ -43,11 +46,34 @@ public final class NetworkMonitorActivity extends FragmentActivity
         view.setAdapter(getGAService().peerListAdapter);
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        getGAApp().getConnectionObservable().deleteObserver(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (getGAService() == null) {
+            finish();
+            return;
+        }
+
+        getGAApp().getConnectionObservable().addObserver(this);
+    }
+
     protected GreenAddressApplication getGAApp() {
         return (GreenAddressApplication) getApplication();
     }
 
     protected GaService getGAService() {
         return getGAApp().gaService;
+    }
+
+    @Override
+    public void update(Observable observable, Object data) {
+
     }
 }
