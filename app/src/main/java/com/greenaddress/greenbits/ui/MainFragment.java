@@ -359,10 +359,23 @@ public class MainFragment extends GAFragment implements Observer {
                         reloadTransactions(getActivity());
                         updateBalance();
 
-                        final SharedPreferences.Editor editor = getGAApp().getSharedPreferences("main", Context.MODE_PRIVATE).edit();
-                        editor.putInt("curSubaccount", curSubaccount);
-                        editor.apply();
+                        final SharedPreferences.Editor mEditor = getGAApp().getSharedPreferences("main", Context.MODE_PRIVATE).edit();
+                        mEditor.putInt("curSubaccount", curSubaccount);
+                        mEditor.apply();
 
+                        final SharedPreferences.Editor sEditor = getGAApp().getSharedPreferences("send", Context.MODE_PRIVATE).edit();
+                        sEditor.putInt("curSubaccount", curSubaccount);
+                        sEditor.apply();
+
+                        final SharedPreferences.Editor rEditor = getGAApp().getSharedPreferences("receive", Context.MODE_PRIVATE).edit();
+                        rEditor.putInt("curSubaccount", curSubaccount);
+                        rEditor.apply();
+
+                        SendFragment sendFrag = new SendFragment();
+                        //((ViewGroup )((TextView) rootView.findViewById(R.id.sendAccountName)).getParent()).getId()
+
+
+                        getFragmentManager().beginTransaction().detach(getFragmentManager().findFragmentById(R.layout.fragment_send)).attach(getFragmentManager().findFragmentById(R.layout.fragment_send)).commit();
                         return null;
                     }
                 },
