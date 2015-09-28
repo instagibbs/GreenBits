@@ -57,12 +57,6 @@ public class ConnectivityObservable extends Observable {
         this.state = state;
         if (state == State.LOGGEDIN) {
             this.forcedLoggedout = false;
-            //if (this.disconnectTimeout != null){
-            //    this.disconnectTimeout.cancel(false);
-            //}
-            Log.d(TAG, "**Disconnect being set to null");
-            this.stopTimer();
-            this.disconnectTimeout = null;
             this.forcedTimeoutout = false;
         }
         setChanged();
@@ -110,7 +104,6 @@ public class ConnectivityObservable extends Observable {
     }
 
     private void stopTimer() {
-        //synchronized (stopClockLock) {
             Log.d(TAG, "** Timeout count-down stopping **");
             for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
                 System.out.println(ste);
@@ -124,11 +117,9 @@ public class ConnectivityObservable extends Observable {
                     Log.d(TAG, "** Timeout count-down:" + disconnectTimeout);
                 }
             }
-       // }
     }
 
     private void startTimer() {
-        //synchronized (stopClockLock) {
             if (service != null) {
 
                 int timeout = 15;
@@ -156,7 +147,6 @@ public class ConnectivityObservable extends Observable {
                     }
                 }, timeout, TimeUnit.SECONDS);
             }
-       // }
     }
 
     private void checkNetwork() {
