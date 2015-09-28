@@ -17,6 +17,7 @@
 
 package com.greenaddress.greenbits.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.widget.ListView;
@@ -49,19 +50,29 @@ public final class NetworkMonitorActivity extends FragmentActivity implements Ob
     @Override
     public void onPause() {
         super.onPause();
+
         getGAApp().getConnectionObservable().deleteObserver(this);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
+        testKickedOut();
         if (getGAService() == null) {
             finish();
             return;
         }
 
         getGAApp().getConnectionObservable().addObserver(this);
+    }
+
+    private void testKickedOut() {
+        if (getGAApp().getConnectionObservable().getIsForcedLoggedOut() || getGAApp().getConnectionObservable().getIsForcedTimeout()) {
+            // FIXME: Should pass flag to activity so it shows it was forced logged out
+            final Intent firstScreenActivity = new Intent(NetworkMonitorActivity.this, FirstScreenActivity.class);
+            startActivity(firstScreenActivity);
+            finish();
+        }
     }
 
     protected GreenAddressApplication getGAApp() {
