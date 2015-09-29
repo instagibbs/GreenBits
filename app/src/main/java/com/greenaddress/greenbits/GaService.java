@@ -148,6 +148,7 @@ public class GaService extends Service {
     private ArrayList<PrettyPeer> peerList = new ArrayList<PrettyPeer>();
     public ArrayAdapter<PrettyPeer> peerListAdapter;
     private PeerFilterProvider pfProvider;
+    private String bloominfo = "";
 
     private Map<TransactionOutPoint, Long> unspentOutpointsSubaccounts;
     private Map<TransactionOutPoint, Long> unspentOutpointsPointers;
@@ -667,6 +668,7 @@ public class GaService extends Service {
                         textView.setTextColor(Color.BLACK); //Force black text.
                         return view;
                     };};;
+
         peerGroup.addEventListener(new PeerEventListener() {
             @Override
             public void onPeersDiscovered(Set<PeerAddress> peerAddresses) {
@@ -686,14 +688,6 @@ public class GaService extends Service {
             @Override
             public void onPeerConnected(final Peer peer, int peerCount) {
 
-                /*for (PrettyPeer ppeer : peerList){
-                    if (new_ppeer.peer == ppeer.peer){
-
-                    }
-                }
-                if (!peerList.contains(peer)) {
-                    peerList.add(new PrettyPeer(Network.NETWORK, peer.getPeerVersionMessage(), null, peer.getAddress()));
-                }*/
                 if(TabbedMainActivity.instance != null){
                     TabbedMainActivity.instance.runOnUiThread(new Runnable() {
                         @Override
@@ -701,20 +695,25 @@ public class GaService extends Service {
                             PrettyPeer new_ppeer = new PrettyPeer(peer);
                             peerList.add(new_ppeer);
                             peerListAdapter.notifyDataSetChanged();
+
+                            //Bloom filter info assumed uniform from single PeerGroup
+                            //TextView bloomview = (TextView) TabbedMainActivity.instance.findViewById(R.id.bloominfo);
+                            //bloomview.setText(new_ppeer.peer.getBloomFilter().toString());
+
+                            //if(peerList.size() == 1) {
+                                Intent i = new Intent("BLOOMINFO_UPDATED");
+                                i.putExtra("bloominfo", new_ppeer.peer.getBloomFilter().toString());
+                            bloominfo = new_ppeer.peer.getBloomFilter().toString();
+                                sendBroadcast(i);
+                            //}
                         }
                     });
                 }
             }
 
             @Override
-            public void onPeerDisconnected(final Peer peer, int peerCount) {
+            public synchronized void onPeerDisconnected(final Peer peer, int peerCount) {
 
-                /*for (PrettyPeer ppeer : peerList){
-
-                }*/
-                /*if (peerList.indexOf(peer) != -1) {
-                    peerList.remove(peerList.indexOf(peer));
-                }*/
                 if(TabbedMainActivity.instance != null){
                     TabbedMainActivity.instance.runOnUiThread(new Runnable() {
                         @Override
@@ -1576,6 +1575,10 @@ public class GaService extends Service {
         }
     }
 
+    public String getBloomInfo(){
+        return bloominfo;
+    }
+
     public ArrayList<PrettyPeer> getPeerGroup(){
         return this.peerList;
     }
@@ -1588,7 +1591,8 @@ public class GaService extends Service {
         }
 
         public String toString(){
-            return peer.toString()+" super";
+            return "IP Addr: "+peer.toString()+"\n"+"Version: "+peer.getPeerVersionMessage().subVer+"\nBlockheight: "+
+                    peer.getBestHeight();
         }
     }
 }

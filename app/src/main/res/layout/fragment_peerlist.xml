@@ -5,8 +5,19 @@
 
     <ListView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="488dp"
         android:textColor="@android:color/black"
-        android:id="@+id/peerlistview"></ListView>
+        android:id="@+id/peerlistview"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="10.0sp"></ListView>
+    <TextView
+        android:id="@+id/bloominfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:gravity="center"/>
+
+
+
 
 </LinearLayout>

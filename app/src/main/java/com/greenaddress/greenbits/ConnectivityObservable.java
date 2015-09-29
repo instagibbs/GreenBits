@@ -104,17 +104,12 @@ public class ConnectivityObservable extends Observable {
     }
 
     private void stopTimer() {
-            Log.d(TAG, "** Timeout count-down stopping **");
             for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
                 System.out.println(ste);
             }
             if (service != null) {
-                Log.d(TAG, "** Timeout count-down stopping because service exists **");
                 if (disconnectTimeout != null && !disconnectTimeout.isCancelled()) {
                     disconnectTimeout.cancel(false);
-                    Log.d(TAG, "** Timeout count-down stopped **");
-                } else {
-                    Log.d(TAG, "** Timeout count-down:" + disconnectTimeout);
                 }
             }
     }
@@ -128,17 +123,9 @@ public class ConnectivityObservable extends Observable {
                 } catch (final Exception e) {
                     // not logged in or not set
                 }
-                Log.d(TAG, "** Timeout count-down initiated **");
-                for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
-                    System.out.println(ste);
-                }
                 disconnectTimeout = ex.schedule(new Callable<Object>() {
                     @Override
                     public Object call() throws Exception {
-                        Log.d(TAG, "** Timeout count-down completed **");
-                        for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
-                            System.out.println(ste);
-                        }
                         forcedTimeoutout = true;
                         service.disconnect(false);
                         setChanged();
