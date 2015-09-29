@@ -172,7 +172,7 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
                         return null;
                     }
                 }
-                
+
                 final Boolean nowEnabled = (Boolean) newValue;
                 SharedPreferences.Editor editor = spvPreferences.edit();
                 editor.putBoolean("enabled", nowEnabled);

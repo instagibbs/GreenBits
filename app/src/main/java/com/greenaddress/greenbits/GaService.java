@@ -228,10 +228,6 @@ public class GaService extends Service {
         return false;
     }
 
-    public boolean getIsSpvSyncStarted(){
-        return syncStarted;
-    }
-
     private void toastTrustedSPV(final String announcement){
         final String trusted_peer = getSharedPreferences("TRUSTED", MODE_PRIVATE).getString("address", "");
         if(TabbedMainActivity.instance != null && !trusted_peer.isEmpty()){
