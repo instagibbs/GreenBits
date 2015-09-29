@@ -155,29 +155,31 @@ public class SettingsActivity extends PreferenceActivity implements Observer {
         spvEnabled.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(final Preference preference, final Object newValue) {
-                Boolean nowEnabled = (Boolean) newValue;
+
+                class SPVButtonPrefAsync extends AsyncTask<Object, Object, Object>{
+
+                    @Override
+                    protected Object doInBackground(Object[] params) {
+                        final Boolean nowEnabled = (Boolean) newValue;
+
+                        if(nowEnabled){
+                            getGAService().setUpSPV();
+                            getGAService().startSpvSync();
+                        }else{
+                            getGAService().stopSPVSync();
+                            getGAService().tearDownSPV();
+                        }
+                        return null;
+                    }
+                }
+                
+                final Boolean nowEnabled = (Boolean) newValue;
                 SharedPreferences.Editor editor = spvPreferences.edit();
                 editor.putBoolean("enabled", nowEnabled);
                 editor.apply();
                 trusted_peer.setEnabled(nowEnabled);
-                if(nowEnabled){
-                    getGAService().setUpSPV();
-                    getGAService().startSpvSync();
-                }else{
-                    getGAService().stopSPVSync();
-                    getGAService().tearDownSPV();
-                }
 
-                /*new MaterialDialog.Builder(SettingsActivity.this)
-                        .title(getResources().getString(R.string.changingRequiresRestartTitle))
-                        .content(getResources().getString(R.string.changingRequiresRestartText))
-                        .positiveColorRes(R.color.accent)
-                        .negativeColorRes(R.color.white)
-                        .titleColorRes(R.color.white)
-                        .contentColorRes(android.R.color.white)
-                        .theme(Theme.DARK)
-                        .positiveText("OK")
-                        .build().show();*/
+                new SPVButtonPrefAsync().execute();
                 return true;
             }
         });
