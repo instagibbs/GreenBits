@@ -72,6 +72,7 @@ import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.crypto.MnemonicException;
 import org.bitcoinj.crypto.TransactionSignature;
 import org.bitcoinj.net.discovery.DnsDiscovery;
+import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
 import org.bitcoinj.store.BlockStore;
@@ -566,6 +567,9 @@ public class GaService extends Service {
                 port = Network.NETWORK.getPort();
             }
         }
+        public String toString(){
+            return addr+":"+port;
+        }
     }
 
     private enum SPVMode{
@@ -691,15 +695,10 @@ public class GaService extends Service {
                             peerList.add(new_ppeer);
                             peerListAdapter.notifyDataSetChanged();
 
-                            //Bloom filter info assumed uniform from single PeerGroup
-                            //TextView bloomview = (TextView) TabbedMainActivity.instance.findViewById(R.id.bloominfo);
-                            //bloomview.setText(new_ppeer.peer.getBloomFilter().toString());
-
-                            //if(peerList.size() == 1) {
-                                Intent i = new Intent("BLOOMINFO_UPDATED");
-                                i.putExtra("bloominfo", new_ppeer.peer.getBloomFilter().toString());
+                            Intent i = new Intent("BLOOMINFO_UPDATED");
+                            i.putExtra("bloominfo", new_ppeer.peer.getBloomFilter().toString());
                             bloominfo = new_ppeer.peer.getBloomFilter().toString();
-                                sendBroadcast(i);
+                            sendBroadcast(i);
                             //}
                         }
                     });
@@ -1586,7 +1585,13 @@ public class GaService extends Service {
         }
 
         public String toString(){
-            return "IP Addr: "+peer.toString()+"\n"+"Version: "+peer.getPeerVersionMessage().subVer+"\nBlockheight: "+
+            String ipAddr = peer.toString();
+            if(ipAddr.length() >= 11 && ipAddr.substring(0,11).equals("[127.0.0.1]")){
+                ipAddr = getSharedPreferences("TRUSTED", MODE_PRIVATE).getString("address", "Trusted Onion");
+                final Node n = new Node(ipAddr);
+                ipAddr = n.toString();
+            }
+            return "IP Addr: "+ipAddr+"\n"+"Version: "+peer.getPeerVersionMessage().subVer+"\nBlockheight: "+
                     peer.getBestHeight();
         }
     }
