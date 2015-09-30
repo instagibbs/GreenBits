@@ -6,11 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.util.Log;
 
-import com.greenaddress.greenbits.ui.TabbedMainActivity;
-
-import java.util.Objects;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.Callable;
@@ -29,7 +25,6 @@ public class ConnectivityObservable extends Observable {
     private boolean forcedLoggedout = false;
     private boolean forcedTimeoutout = false;
     private static final String TAG = "ConnectivityObservable";
-    private static Object stopClockLock = new Object();
     private final BroadcastReceiver mNetBroadReceiver = new BroadcastReceiver() {
         public void onReceive(final Context context, final Intent intent) {
             checkNetwork();
@@ -104,9 +99,6 @@ public class ConnectivityObservable extends Observable {
     }
 
     private void stopTimer() {
-            for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
-                System.out.println(ste);
-            }
             if (service != null) {
                 if (disconnectTimeout != null && !disconnectTimeout.isCancelled()) {
                     disconnectTimeout.cancel(false);
