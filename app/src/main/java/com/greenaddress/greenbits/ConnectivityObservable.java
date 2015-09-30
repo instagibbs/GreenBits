@@ -107,13 +107,16 @@ public class ConnectivityObservable extends Observable {
     }
 
     private void startTimer() {
+
         if (service != null) {
-            int timeout = 15;
+
+            int timeout = 5;
             try {
                 timeout = (int) service.getAppearanceValue("altimeout");
             } catch (final Exception e) {
                 // not logged in or not set
             }
+
             disconnectTimeout = ex.schedule(new Callable<Object>() {
                 @Override
                 public Object call() throws Exception {
@@ -123,7 +126,7 @@ public class ConnectivityObservable extends Observable {
                     notifyObservers();
                     return null;
                 }
-            }, timeout, TimeUnit.SECONDS);
+            }, timeout, TimeUnit.MINUTES);
         }
     }
 

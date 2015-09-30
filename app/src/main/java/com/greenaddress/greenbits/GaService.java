@@ -12,11 +12,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,7 +64,6 @@ import org.bitcoinj.core.TransactionOutPoint;
 import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.core.Utils;
 import org.bitcoinj.core.VerificationException;
-import org.bitcoinj.core.VersionMessage;
 import org.bitcoinj.core.Wallet;
 import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -122,11 +119,9 @@ public class GaService extends Service {
     final private GaObservable newTxVerifiedObservable = new GaObservable();
     public ListenableFuture<Void> onConnected;
     private Handler uiHandler;
-    private int refcount = 0;
     private ListenableFuture<QrBitmap> latestQrBitmapMnemonics;
     private ListenableFuture<String> latestMnemonics;
     private final Object startSPVLock = new Object();
-    private TorClient tClient;
 
     private boolean reconnect = true, isSpvSyncing = false, startSpvAfterInit = false, syncStarted = false;
 
