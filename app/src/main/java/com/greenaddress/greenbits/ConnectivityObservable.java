@@ -99,33 +99,32 @@ public class ConnectivityObservable extends Observable {
     }
 
     private void stopTimer() {
-            if (service != null) {
-                if (disconnectTimeout != null && !disconnectTimeout.isCancelled()) {
-                    disconnectTimeout.cancel(false);
-                }
+        if (service != null) {
+            if (disconnectTimeout != null && !disconnectTimeout.isCancelled()) {
+                disconnectTimeout.cancel(false);
             }
+        }
     }
 
     private void startTimer() {
-            if (service != null) {
-
-                int timeout = 15;
-                try {
-                    timeout = (int) service.getAppearanceValue("altimeout");
-                } catch (final Exception e) {
-                    // not logged in or not set
-                }
-                disconnectTimeout = ex.schedule(new Callable<Object>() {
-                    @Override
-                    public Object call() throws Exception {
-                        forcedTimeoutout = true;
-                        service.disconnect(false);
-                        setChanged();
-                        notifyObservers();
-                        return null;
-                    }
-                }, timeout, TimeUnit.SECONDS);
+        if (service != null) {
+            int timeout = 15;
+            try {
+                timeout = (int) service.getAppearanceValue("altimeout");
+            } catch (final Exception e) {
+                // not logged in or not set
             }
+            disconnectTimeout = ex.schedule(new Callable<Object>() {
+                @Override
+                public Object call() throws Exception {
+                    forcedTimeoutout = true;
+                    service.disconnect(false);
+                    setChanged();
+                    notifyObservers();
+                    return null;
+                }
+            }, timeout, TimeUnit.SECONDS);
+        }
     }
 
     private void checkNetwork() {
