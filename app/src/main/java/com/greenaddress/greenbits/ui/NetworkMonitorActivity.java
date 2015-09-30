@@ -58,7 +58,7 @@ public final class NetworkMonitorActivity extends FragmentActivity implements Ob
         //TextView tView = new TextView(this.getApplicationContext());
         //tView.setText("No peers connected");
         //tView.setTextColor(Color.BLACK);
-        //view.setEmptyView(findViewById(R.id.empty_list_view));
+        view.setEmptyView(findViewById(R.id.empty_list_view));
         view.setAdapter(getGAService().peerListAdapter);
     }
 
