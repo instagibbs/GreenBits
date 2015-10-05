@@ -371,11 +371,11 @@ public class MainFragment extends GAFragment implements Observer {
                         rEditor.putInt("curSubaccount", curSubaccount);
                         rEditor.apply();
 
-                        SendFragment sendFrag = new SendFragment();
+                        //SendFragment sendFrag = new SendFragment();
                         //((ViewGroup )((TextView) rootView.findViewById(R.id.sendAccountName)).getParent()).getId()
 
 
-                        getFragmentManager().beginTransaction().detach(getFragmentManager().findFragmentById(R.layout.fragment_send)).attach(getFragmentManager().findFragmentById(R.layout.fragment_send)).commit();
+                        //TabbedMainActivity.instance.getFragmentManager().findFragmentById(R.id.sendAccountName).conf
                         return null;
                     }
                 },

@@ -675,6 +675,13 @@ public class SendFragment extends GAFragment {
 
         final GaService gaService = getGAService();
         hideInstantIf2of3();
+
+        this.configSendFooter();
+
+        return rootView;
+    }
+
+    public void configSendFooter() {
         getGAApp().configureSubaccountsFooter(
                 curSubaccount,
                 getActivity(),
@@ -693,11 +700,11 @@ public class SendFragment extends GAFragment {
                         editor.apply();
                         curBalanceObserver = makeBalanceObserver();
                         getGAService().getBalanceObservables().get(new Long(curSubaccount)).addObserver(curBalanceObserver);
-                        Futures.addCallback(gaService.getSubaccountBalance(curSubaccount), new FutureCallback<Map<?, ?>>() {
+                        Futures.addCallback(getGAService().getSubaccountBalance(curSubaccount), new FutureCallback<Map<?, ?>>() {
                             @Override
                             public void onSuccess(@Nullable Map<?, ?> result) {
                                 Coin coin = Coin.valueOf(Long.valueOf((String) result.get("satoshi")).longValue());
-                                final String btcUnit = (String) gaService.getAppearanceValue("unit");
+                                final String btcUnit = (String) getGAService().getAppearanceValue("unit");
                                 final TextView sendSubAccountBalance = (TextView) rootView.findViewById(R.id.sendSubAccountBalance);
                                 MonetaryFormat format = CurrencyMapper.mapBtcUnitToFormat(btcUnit);
                                 final String btcBalance = format.noCode().format(coin).toString();
@@ -719,8 +726,6 @@ public class SendFragment extends GAFragment {
                 },
                 rootView.findViewById(R.id.sendNoTwoFacFooter)
         );
-
-        return rootView;
     }
 
     @Override
