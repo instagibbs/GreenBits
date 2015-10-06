@@ -501,6 +501,8 @@ public class TabbedMainActivity extends ActionBarActivity implements ActionBar.T
                     return new MainFragment();
                 case 2:
                     setIdVisible(false, R.id.action_share);
+                    //SendFragment sendFragment = new SendFragment();
+                    //getSupportFragmentManager().beginTransaction().add(sendFragment, "sendFrag").commit();
                     return new SendFragment();
             }
 
@@ -525,6 +527,18 @@ public class TabbedMainActivity extends ActionBarActivity implements ActionBar.T
                     return getString(R.string.send_title).toUpperCase(l);
             }
             return null;
+        }
+    }
+
+    public void refreshSend(int curSubAccount) {
+        SendFragment sendFragment = (SendFragment) getSupportFragmentManager().findFragmentByTag("android:switcher:" + mViewPager.getId() + ":2");
+
+        if (sendFragment != null) {
+
+
+            mSectionsPagerAdapter.startUpdate(mViewPager);
+            sendFragment.configSendFooter(curSubAccount);
+            mSectionsPagerAdapter.finishUpdate(mViewPager);
         }
     }
 }

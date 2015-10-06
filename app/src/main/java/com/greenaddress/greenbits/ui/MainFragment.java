@@ -1,5 +1,6 @@
 package com.greenaddress.greenbits.ui;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -7,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.TypedValue;
@@ -372,8 +374,10 @@ public class MainFragment extends GAFragment implements Observer {
                         rEditor.apply();
 
                         //SendFragment sendFrag = new SendFragment();
-                        //((ViewGroup )((TextView) rootView.findViewById(R.id.sendAccountName)).getParent()).getId()
-                        getGAApp().configureSubaccountsFooter(
+                        //TextView viewGroup = ((TextView) rootView.findViewById(R.id.send));
+                        ((TabbedMainActivity)getActivity()).refreshSend(curSubaccount);
+                        //((SendFragment)getFragmentManager().findFragmentById(R.id.sendFrag)).configSendFooter();
+                        /*getGAApp().configureSubaccountsFooter(
                                 curSubaccount,
                                 getActivity(),
                                 (TextView) ((View)rootView.getParent()).findViewById(R.id.sendAccountName),
@@ -416,7 +420,7 @@ public class MainFragment extends GAFragment implements Observer {
                                     }
                                 },
                                 rootView.findViewById(R.id.sendNoTwoFacFooter)
-                        );
+                        );*/
 
                         //TabbedMainActivity.instance.getFragmentManager().findFragmentById(R.id.sendAccountName).conf
                         return null;

@@ -676,14 +676,14 @@ public class SendFragment extends GAFragment {
         final GaService gaService = getGAService();
         hideInstantIf2of3();
 
-        this.configSendFooter();
+        this.configSendFooter(curSubaccount);
 
         return rootView;
     }
 
-    public void configSendFooter() {
+    public void configSendFooter(int curSubaccountPrime) {
         getGAApp().configureSubaccountsFooter(
-                curSubaccount,
+                curSubaccountPrime,
                 getActivity(),
                 (TextView) rootView.findViewById(R.id.sendAccountName),
                 (LinearLayout) rootView.findViewById(R.id.sendFooter),

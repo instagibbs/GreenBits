@@ -89,7 +89,7 @@ public class GreenAddressApplication extends MultiDexApplication {
             }
         });
         if (gaService.getTwoFacConfig() != null) {
-            //configureNoTwoFacFooter(noTwoFacFooter, activity);
+            configureNoTwoFacFooter(noTwoFacFooter, activity);
         }
         if (gaService.getSubaccounts().size() > 0) {
             accountName.setText(getResources().getText(R.string.main_account));

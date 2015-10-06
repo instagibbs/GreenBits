@@ -106,7 +106,7 @@ public final class NetworkMonitorActivity extends FragmentActivity implements Ob
                 }
 
                 @Override
-                public synchronized void onPeerConnected(final Peer peer, int peerCount) {
+                public synchronized void onPeerConnected(final Peer peer, final int peerCount) {
                     final PrettyPeer new_ppeer = new PrettyPeer(peer);
 
 
@@ -115,7 +115,6 @@ public final class NetworkMonitorActivity extends FragmentActivity implements Ob
                         public void run() {
                             peerList.add(new_ppeer);
                             peerListAdapter.notifyDataSetChanged();
-
                             bloominfo = peer.getBloomFilter().toString();
                             TextView tview = (TextView) findViewById(R.id.bloominfo);
                             tview.setText(bloominfo);
