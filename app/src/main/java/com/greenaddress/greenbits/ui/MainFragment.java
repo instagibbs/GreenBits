@@ -373,7 +373,50 @@ public class MainFragment extends GAFragment implements Observer {
 
                         //SendFragment sendFrag = new SendFragment();
                         //((ViewGroup )((TextView) rootView.findViewById(R.id.sendAccountName)).getParent()).getId()
+                        getGAApp().configureSubaccountsFooter(
+                                curSubaccount,
+                                getActivity(),
+                                (TextView) ((View)rootView.getParent()).findViewById(R.id.sendAccountName),
+                                (LinearLayout) ((View)rootView.getParent()).findViewById(R.id.sendFooter),
+                                (LinearLayout) ((View)rootView.getParent()).findViewById(R.id.footerClickableArea),
+                                new Function<Integer, Void>() {
+                                    @Nullable
+                                    @Override
+                                    public Void apply(@Nullable Integer input) {
+                                        getGAService().getBalanceObservables().get(new Long(curSubaccount)).deleteObserver(curBalanceObserver);
+                                        curSubaccount = input.intValue();
+                                        //hideInstantIf2of3();
+                                        final SharedPreferences.Editor editor = getGAApp().getSharedPreferences("send", Context.MODE_PRIVATE).edit();
+                                        editor.putInt("curSubaccount", curSubaccount);
+                                        editor.apply();
+                                        curBalanceObserver = makeBalanceObserver();
+                                        getGAService().getBalanceObservables().get(new Long(curSubaccount)).addObserver(curBalanceObserver);
+                                        Futures.addCallback(getGAService().getSubaccountBalance(curSubaccount), new FutureCallback<Map<?, ?>>() {
+                                            @Override
+                                            public void onSuccess(@Nullable Map<?, ?> result) {
+                                                Coin coin = Coin.valueOf(Long.valueOf((String) result.get("satoshi")).longValue());
+                                                final String btcUnit = (String) getGAService().getAppearanceValue("unit");
+                                                final TextView sendSubAccountBalance = (TextView) ((View)rootView.getParent()).findViewById(R.id.sendSubAccountBalance);
+                                                MonetaryFormat format = CurrencyMapper.mapBtcUnitToFormat(btcUnit);
+                                                final String btcBalance = format.noCode().format(coin).toString();
+                                                final DecimalFormat formatter = new DecimalFormat("#,###.########");
+                                                try {
+                                                    sendSubAccountBalance.setText(formatter.format(formatter.parse(btcBalance)));
+                                                } catch (final ParseException e) {
+                                                    sendSubAccountBalance.setText(btcBalance);
+                                                }
+                                            }
 
+                                            @Override
+                                            public void onFailure(Throwable t) {
+
+                                            }
+                                        });
+                                        return null;
+                                    }
+                                },
+                                rootView.findViewById(R.id.sendNoTwoFacFooter)
+                        );
 
                         //TabbedMainActivity.instance.getFragmentManager().findFragmentById(R.id.sendAccountName).conf
                         return null;
