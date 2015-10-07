@@ -320,6 +320,13 @@ public class SendFragment extends GAFragment {
 
         rootView = inflater.inflate(R.layout.fragment_send, container, false);
 
+        initView(rootView, container);
+
+        return rootView;
+    }
+
+    public void initView(View rootView, ViewGroup container) {
+
         curSubaccount = getGAApp().getSharedPreferences("send", Context.MODE_PRIVATE).getInt("curSubaccount", 0);
 
         sendButton = (Button) rootView.findViewById(R.id.sendSendButton);
@@ -677,8 +684,6 @@ public class SendFragment extends GAFragment {
         hideInstantIf2of3();
 
         this.configSendFooter(curSubaccount);
-
-        return rootView;
     }
 
     public void configSendFooter(int curSubaccountPrime) {
@@ -687,7 +692,7 @@ public class SendFragment extends GAFragment {
                 getActivity(),
                 (TextView) rootView.findViewById(R.id.sendAccountName),
                 (LinearLayout) rootView.findViewById(R.id.sendFooter),
-                (LinearLayout) rootView.findViewById(R.id.footerClickableArea),
+                (LinearLayout) rootView.findViewById(R.id.footerSendClickableArea),
                 new Function<Integer, Void>() {
                     @Nullable
                     @Override

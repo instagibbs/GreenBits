@@ -501,8 +501,6 @@ public class TabbedMainActivity extends ActionBarActivity implements ActionBar.T
                     return new MainFragment();
                 case 2:
                     setIdVisible(false, R.id.action_share);
-                    //SendFragment sendFragment = new SendFragment();
-                    //getSupportFragmentManager().beginTransaction().add(sendFragment, "sendFrag").commit();
                     return new SendFragment();
             }
 
@@ -530,14 +528,25 @@ public class TabbedMainActivity extends ActionBarActivity implements ActionBar.T
         }
     }
 
-    public void refreshSend(int curSubAccount) {
+    public void refreshSend() {
         SendFragment sendFragment = (SendFragment) getSupportFragmentManager().findFragmentByTag("android:switcher:" + mViewPager.getId() + ":2");
 
         if (sendFragment != null) {
 
+            //getGAService().curSubaccount = curSubAccount;
+            //mSectionsPagerAdapter.startUpdate(mViewPager);
+            sendFragment.initView(mViewPager, mViewPager); //onGACreateView(sendFragment.getLayoutInflater(null), mViewPager, null);//.configSendFooter(curSubAccount);
+            //LAST THING WORKS!!!! config footer call works in limited way
+            //mSectionsPagerAdapter.finishUpdate(mViewPager);
+        }
+    }
 
+    public void refreshReceive(int curSubaccount) {
+        ReceiveFragment receiveFragment = (ReceiveFragment) getSupportFragmentManager().findFragmentByTag("android:switcher:" + mViewPager.getId() + ":0");
+
+        if (receiveFragment != null) {
             mSectionsPagerAdapter.startUpdate(mViewPager);
-            sendFragment.configSendFooter(curSubAccount);
+            receiveFragment.initView(mViewPager, mViewPager);
             mSectionsPagerAdapter.finishUpdate(mViewPager);
         }
     }

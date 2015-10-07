@@ -105,9 +105,22 @@ public class ReceiveFragment extends GAFragment implements OnDiscoveredTagListen
         tagDispatcher = TagDispatcher.get(getActivity(), this);
         tagDispatcher.enableExclusiveNfc();
 
+        final View rootView = inflater.inflate(R.layout.fragment_receive, container, false);
+        final View inflatedLayout = getActivity().getLayoutInflater().inflate(R.layout.dialog_qrcode, container, false);
+
+
+
+        initView(rootView, inflatedLayout);
+
+        return rootView;
+    }
+
+    public void initView(final View rootView, final View inflatedLayout) {
+
         curSubaccount = getGAApp().getSharedPreferences("receive", Context.MODE_PRIVATE).getInt("curSubaccount", 0);
 
-        final View rootView = inflater.inflate(R.layout.fragment_receive, container, false);
+        curSubaccount = getGAApp().getSharedPreferences("receive", Context.MODE_PRIVATE).getInt("curSubaccount", 0);
+
         final TextView receiveAddress = (TextView) rootView.findViewById(R.id.receiveAddressText);
         final TextView copyIcon = (TextView) rootView.findViewById(R.id.receiveCopyIcon);
         final TextView copyText = (TextView) rootView.findViewById(R.id.receiveCopyText);
@@ -135,7 +148,7 @@ public class ReceiveFragment extends GAFragment implements OnDiscoveredTagListen
                     }
                 }
         );
-        final View inflatedLayout = getActivity().getLayoutInflater().inflate(R.layout.dialog_qrcode, null, false);
+
 
         final ImageView qrcodeInDialog = (ImageView) inflatedLayout.findViewById(R.id.qrInDialogImageView);
         onAddress = new FutureCallback<QrBitmap>() {
@@ -235,7 +248,7 @@ public class ReceiveFragment extends GAFragment implements OnDiscoveredTagListen
                 getActivity(),
                 (TextView) rootView.findViewById(R.id.sendAccountName),
                 (LinearLayout) rootView.findViewById(R.id.receiveFooter),
-                (LinearLayout) rootView.findViewById(R.id.footerClickableArea),
+                (LinearLayout) rootView.findViewById(R.id.footerReceiveClickableArea),
                 new Function<Integer, Void>() {
                     @Nullable
                     @Override
@@ -253,9 +266,6 @@ public class ReceiveFragment extends GAFragment implements OnDiscoveredTagListen
                 },
                 rootView.findViewById(R.id.receiveNoTwoFacFooter)
         );
-
-
-        return rootView;
     }
 
     private void stopNewAddressAnimation(final View rootView) {

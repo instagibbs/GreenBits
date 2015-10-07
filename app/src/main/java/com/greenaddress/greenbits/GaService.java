@@ -137,7 +137,7 @@ public class GaService extends Service {
 
     private PeerFilterProvider pfProvider;
 
-
+    public int curSubaccount = 0;
     private Map<TransactionOutPoint, Long> unspentOutpointsSubaccounts;
     private Map<TransactionOutPoint, Long> unspentOutpointsPointers;
     private Map<TransactionOutPoint, Coin> countedUtxoValues;
